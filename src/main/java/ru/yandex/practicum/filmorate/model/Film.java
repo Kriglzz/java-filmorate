@@ -26,12 +26,17 @@ public class Film {
     @lombok.NonNull
     @Positive
     private int duration;
+    private static int filmCount = 0;
 
     public Film(int id, String name, String description, LocalDateTime releaseDate, int duration) {
-        this.id = id;
+
+        this.id = generateId();
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+    }
+    Integer generateId() {
+        return ++filmCount;
     }
 }

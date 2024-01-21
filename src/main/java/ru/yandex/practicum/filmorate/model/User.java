@@ -27,6 +27,7 @@ public class User {
     private final LocalDateTime birthday;
     @lombok.NonNull
     private int id;
+    private static int userCount = 0;
     public User(int id, String email, String login, String name, LocalDateTime birthday) {
         this.id = id;
         this.email = email;
@@ -35,8 +36,11 @@ public class User {
         this.birthday = birthday;
     }
 
-    @AssertTrue(message = "Указано пустое имя. Будет использован login пользователя")
+    @AssertTrue(message = "Указано пустое имя. Будет использован login пользователя.")
     private boolean isNameSameAsLogin() {
         return name.isEmpty() || name.equals(login);
+    }
+    Integer generateId() {
+        return ++userCount;
     }
 }
