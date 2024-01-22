@@ -10,7 +10,7 @@ public class InMemoryUserDataBase implements UserDataBase{
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
-    public User addUser(User user) {
+    public User createUser(User user) {
         users.put(user.getId(), user);
         return user;
     }
