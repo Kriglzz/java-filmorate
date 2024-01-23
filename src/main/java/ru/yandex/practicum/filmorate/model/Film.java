@@ -5,7 +5,8 @@ import ru.yandex.practicum.filmorate.validator.AfterDate;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
-import java.time.LocalDateTime;
+import javax.validation.constraints.Size;
+import java.time.LocalDate;
 
 /**
  * Film.
@@ -16,11 +17,11 @@ public class Film {
     @NotBlank
     private final String name;
     @lombok.NonNull
-    @Max(200)
+    @Size(max = 200, message = "Длина описания не должна превышать 200 символов")
     private final String description;
     @lombok.NonNull
     @AfterDate(date = "1895-12-28")
-    private final LocalDateTime releaseDate;
+    private final LocalDate releaseDate;
     @lombok.NonNull
     private int id;
     @lombok.NonNull
@@ -28,7 +29,7 @@ public class Film {
     private int duration;
     private static int filmCount = 0;
 
-    public Film(int id, String name, String description, LocalDateTime releaseDate, int duration) {
+    public Film(String name, String description, LocalDate releaseDate, int duration) {
 
         this.id = generateId();
         this.name = name;

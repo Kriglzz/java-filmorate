@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.validator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-class NoBlankSpaceValidator implements ConstraintValidator<NoBlankSpace, String> {
+public class NoBlankSpaceValidator implements ConstraintValidator<NoBlankSpace, String> {
     @Override
     public void initialize(NoBlankSpace constraintAnnotation) {
     }
