@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Validated
 @lombok.Data
 public class User {
+    private static int userCount = 0;
     @lombok.NonNull
     @NotBlank
     @Email
@@ -21,13 +22,13 @@ public class User {
     @NoBlankSpace
     private final String login;
     @lombok.NonNull
-    private String name;
-    @lombok.NonNull
     @Past
     private final LocalDate birthday;
     @lombok.NonNull
+    private String name;
+    @lombok.NonNull
     private int id;
-    private static int userCount = 0;
+
     public User(String email, String login, String name, LocalDate birthday) {
         this.id = generateId();
         this.email = email;
@@ -47,6 +48,7 @@ public class User {
         }
 
     }
+
     Integer generateId() {
         return ++userCount;
     }

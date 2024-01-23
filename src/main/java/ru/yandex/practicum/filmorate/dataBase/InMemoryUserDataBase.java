@@ -5,8 +5,9 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
+
 @RestController
-public class InMemoryUserDataBase implements UserDataBase{
+public class InMemoryUserDataBase implements UserDataBase {
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
@@ -19,7 +20,7 @@ public class InMemoryUserDataBase implements UserDataBase{
     public User updateUser(User user) {
         int id = user.getId();
         User savedUser = users.get(id);
-        if (savedUser == null){
+        if (savedUser == null) {
             return null;
         }
         users.put(id, user);

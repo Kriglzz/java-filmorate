@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.model;
 
 import ru.yandex.practicum.filmorate.validator.AfterDate;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
@@ -13,6 +12,7 @@ import java.time.LocalDate;
  */
 @lombok.Data
 public class Film {
+    private static int filmCount = 0;
     @lombok.NonNull
     @NotBlank
     private final String name;
@@ -27,7 +27,6 @@ public class Film {
     @lombok.NonNull
     @Positive
     private int duration;
-    private static int filmCount = 0;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
 
@@ -37,6 +36,7 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
     }
+
     Integer generateId() {
         return ++filmCount;
     }

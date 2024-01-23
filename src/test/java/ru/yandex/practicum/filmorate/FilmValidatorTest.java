@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.ConstraintViolation;
@@ -12,15 +11,17 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class FilmValidatorTest {
     private Validator validator;
+
     @Before
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
+
     @Test
     public void addInappropriateNameFilmTest() {
         Film film = new Film(
@@ -30,7 +31,7 @@ public class FilmValidatorTest {
                 100);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1,violations.size());
+        assertEquals(1, violations.size());
     }
 
     @Test
@@ -42,7 +43,7 @@ public class FilmValidatorTest {
                 100);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1,violations.size());
+        assertEquals(1, violations.size());
     }
 
     @Test
@@ -54,6 +55,6 @@ public class FilmValidatorTest {
                 -100);
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1,violations.size());
+        assertEquals(1, violations.size());
     }
 }

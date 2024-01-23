@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.HashMap;
 import java.util.Map;
+
 @RestController
 public class InMemoryFilmDataBase implements FilmDataBase {
     private final Map<Integer, Film> films = new HashMap<>();
@@ -19,7 +20,7 @@ public class InMemoryFilmDataBase implements FilmDataBase {
     public Film updateFilm(Film film) {
         int id = film.getId();
         Film savedFilm = films.get(id);
-        if (savedFilm == null){
+        if (savedFilm == null) {
             return null;
         }
         films.put(id, film);

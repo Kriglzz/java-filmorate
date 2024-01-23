@@ -13,17 +13,18 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserService {
     private final InMemoryUserDataBase inMemoryUserDataBase;
+
     public User createUser(User user) {
         log.info("Пользователь {} добавлен", user);
         return inMemoryUserDataBase.createUser(user);
     }
 
-    public User updateUser(User user){
+    public User updateUser(User user) {
         log.info("Пользователь {} обновлен", user);
         return inMemoryUserDataBase.updateUser(user);
     }
 
-    public Map<Integer, User> getAllUsers (){
+    public Map<Integer, User> getAllUsers() {
         return inMemoryUserDataBase.getAllUsers();
     }
 }

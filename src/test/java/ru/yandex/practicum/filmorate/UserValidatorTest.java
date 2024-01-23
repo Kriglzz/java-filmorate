@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.ConstraintViolation;
@@ -16,11 +15,13 @@ import static org.junit.Assert.assertEquals;
 
 public class UserValidatorTest {
     private Validator validator;
+
     @Before
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
+
     @Test
     public void addInappropriateEmailFilmTest() {
         User user = new User(
@@ -30,7 +31,7 @@ public class UserValidatorTest {
                 LocalDate.of(1970, 10, 6));
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1,violations.size());
+        assertEquals(1, violations.size());
     }
 
     @Test
@@ -42,7 +43,7 @@ public class UserValidatorTest {
                 LocalDate.of(1970, 10, 6));
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1,violations.size());
+        assertEquals(1, violations.size());
     }
 
     @Test
@@ -52,8 +53,9 @@ public class UserValidatorTest {
                 "MoneyLover",
                 "",
                 LocalDate.of(1970, 10, 6));
-        assertEquals("MoneyLover",user.getName());
+        assertEquals("MoneyLover", user.getName());
     }
+
     @Test
     public void addInappropriateDateFilmTest() {
         User user = new User(
@@ -63,6 +65,6 @@ public class UserValidatorTest {
                 LocalDate.of(9999, 10, 6));
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1,violations.size());
+        assertEquals(1, violations.size());
     }
 }

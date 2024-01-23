@@ -13,17 +13,18 @@ import java.util.Map;
 @AllArgsConstructor
 public class FilmService {
     private final InMemoryFilmDataBase inMemoryFilmDataBase;
+
     public Film addFilm(Film film) {
         log.info("Фильм {} добавлен", film);
         return inMemoryFilmDataBase.addFilm(film);
     }
 
-    public Film updateFilm(Film film){
+    public Film updateFilm(Film film) {
         log.info("Фильм {} обновлен", film);
         return inMemoryFilmDataBase.updateFilm(film);
     }
 
-    public Map<Integer, Film> getAllFilms (){
+    public Map<Integer, Film> getAllFilms() {
         return inMemoryFilmDataBase.getAllFilms();
     }
 }
