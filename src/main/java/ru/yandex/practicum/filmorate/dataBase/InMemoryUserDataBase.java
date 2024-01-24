@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.dataBase;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import java.util.Objects;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Component
 public class InMemoryUserDataBase implements UserDataBase {
@@ -24,13 +24,13 @@ public class InMemoryUserDataBase implements UserDataBase {
                 break;
             }
         }
-            users.add(user);
-            return user;
-        }
+        users.add(user);
+        return user;
+    }
 
 
-        @Override
-        public ArrayList<User> getAllUsers () {
-            return users;
-        }
+    @Override
+    public ArrayList<User> getAllUsers() {
+        return users;
+    }
 }
