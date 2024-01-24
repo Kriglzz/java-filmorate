@@ -2,12 +2,12 @@ package ru.yandex.practicum.filmorate.dataBase;
 
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Map;
+import java.util.ArrayList;
 
 public interface UserDataBase {
     public User createUser(User user);
 
     public User updateUser(User user);
 
-    public Map<Integer, User> getAllUsers();
+    public ArrayList<User> getAllUsers();
 }

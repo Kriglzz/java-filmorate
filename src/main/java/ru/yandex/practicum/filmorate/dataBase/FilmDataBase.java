@@ -2,7 +2,8 @@ package ru.yandex.practicum.filmorate.dataBase;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Map;
+import java.util.ArrayList;
+
 
 public interface FilmDataBase {
 
@@ -10,5 +11,5 @@ public interface FilmDataBase {
 
     public Film updateFilm(Film film);
 
-    public Map<Integer, Film> getAllFilms();
+    public ArrayList<Film> getAllFilms();
 }

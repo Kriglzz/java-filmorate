@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.Map;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/films")
@@ -25,7 +25,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Map<Integer, Film> getAllFilms() {
+    public ArrayList<Film> getAllFilms() {
         return filmService.getAllFilms();
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dataBase.InMemoryUserDataBase;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Map;
+import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -24,7 +24,7 @@ public class UserService {
         return inMemoryUserDataBase.updateUser(user);
     }
 
-    public Map<Integer, User> getAllUsers() {
+    public ArrayList<User> getAllUsers() {
         return inMemoryUserDataBase.getAllUsers();
     }
 }

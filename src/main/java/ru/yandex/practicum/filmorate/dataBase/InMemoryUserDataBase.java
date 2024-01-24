@@ -1,34 +1,36 @@
 package ru.yandex.practicum.filmorate.dataBase;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import java.util.Objects;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
-@RestController
+@Component
 public class InMemoryUserDataBase implements UserDataBase {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final ArrayList<User> users = new ArrayList<>();
 
     @Override
     public User createUser(User user) {
-        users.put(user.getId(), user);
+        users.add(user);
         return user;
     }
 
     @Override
     public User updateUser(User user) {
-        int id = user.getId();
-        User savedUser = users.get(id);
-        if (savedUser == null) {
-            return null;
+        for (User u : users) {
+            if (Objects.equals(u.getId(), user.getId())) {
+                users.remove(u);
+                break;
+            }
         }
-        users.put(id, user);
-        return user;
-    }
+            users.add(user);
+            return user;
+        }
 
-    @Override
-    public Map<Integer, User> getAllUsers() {
-        return users;
-    }
+
+        @Override
+        public ArrayList<User> getAllUsers () {
+            return users;
+        }
 }

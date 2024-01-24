@@ -1,34 +1,35 @@
 package ru.yandex.practicum.filmorate.dataBase;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Objects;
 
-@RestController
+@Component
 public class InMemoryFilmDataBase implements FilmDataBase {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final ArrayList<Film> films = new ArrayList<>();
 
     @Override
     public Film addFilm(Film film) {
-        films.put(film.getId(), film);
+        films.add(film);
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        int id = film.getId();
-        Film savedFilm = films.get(id);
-        if (savedFilm == null) {
-            return null;
+        for (Film f : films) {
+            if (Objects.equals(f.getId(), film.getId())) {
+                films.remove(f);
+                break;
+            }
         }
-        films.put(id, film);
+        films.add(film);
         return film;
     }
 
     @Override
-    public Map<Integer, Film> getAllFilms() {
+    public ArrayList<Film> getAllFilms() {
         return films;
     }
 }

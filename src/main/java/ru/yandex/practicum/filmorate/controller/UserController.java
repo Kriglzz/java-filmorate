@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Map;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/users")
@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Map<Integer, User> getAllUsers() {
+    public ArrayList<User> getAllUsers() {
         return userService.getAllUsers();
     }
 }

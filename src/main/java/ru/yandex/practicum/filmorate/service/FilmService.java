@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dataBase.InMemoryFilmDataBase;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Map;
+import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -24,7 +24,7 @@ public class FilmService {
         return inMemoryFilmDataBase.updateFilm(film);
     }
 
-    public Map<Integer, Film> getAllFilms() {
+    public ArrayList<Film> getAllFilms() {
         return inMemoryFilmDataBase.getAllFilms();
     }
 }
