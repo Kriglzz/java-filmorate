@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dataBase.InMemoryUserDataBase;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -12,19 +12,19 @@ import java.util.ArrayList;
 @Slf4j
 @AllArgsConstructor
 public class UserService {
-    private final InMemoryUserDataBase inMemoryUserDataBase;
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     public User createUser(User user) {
         log.info("Пользователь {} добавлен", user);
-        return inMemoryUserDataBase.createUser(user);
+        return inMemoryUserStorage.createUser(user);
     }
 
     public User updateUser(User user) {
         log.info("Пользователь {} обновлен", user);
-        return inMemoryUserDataBase.updateUser(user);
+        return inMemoryUserStorage.updateUser(user);
     }
 
     public ArrayList<User> getAllUsers() {
-        return inMemoryUserDataBase.getAllUsers();
+        return inMemoryUserStorage.getAllUsers();
     }
 }

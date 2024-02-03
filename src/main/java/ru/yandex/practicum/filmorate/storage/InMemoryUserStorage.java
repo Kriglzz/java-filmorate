@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dataBase;
+package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 @Component
-public class InMemoryUserDataBase implements UserDataBase {
+public class InMemoryUserStorage implements UserStorage {
     private final ArrayList<User> users = new ArrayList<>();
 
     @Override

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dataBase.InMemoryFilmDataBase;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
@@ -12,19 +12,19 @@ import java.util.ArrayList;
 @Slf4j
 @AllArgsConstructor
 public class FilmService {
-    private final InMemoryFilmDataBase inMemoryFilmDataBase;
+    private final InMemoryFilmStorage inMemoryFilmStorage;
 
     public Film addFilm(Film film) {
         log.info("Фильм {} добавлен", film);
-        return inMemoryFilmDataBase.addFilm(film);
+        return inMemoryFilmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
         log.info("Фильм {} обновлен", film);
-        return inMemoryFilmDataBase.updateFilm(film);
+        return inMemoryFilmStorage.updateFilm(film);
     }
 
     public ArrayList<Film> getAllFilms() {
-        return inMemoryFilmDataBase.getAllFilms();
+        return inMemoryFilmStorage.getAllFilms();
     }
 }
