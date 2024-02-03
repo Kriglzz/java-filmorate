@@ -10,4 +10,6 @@ public interface UserStorage {
     public User updateUser(User user);
 
     public ArrayList<User> getAllUsers();
+
+    public User getUserById(int userId);
 }

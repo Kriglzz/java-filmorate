@@ -12,4 +12,6 @@ public interface FilmStorage {
     public Film updateFilm(Film film);
 
     public ArrayList<Film> getAllFilms();
+
+    public Film getFilmById(int filmId);
 }

@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -32,5 +33,13 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public ArrayList<User> getAllUsers() {
         return users;
+    }
+
+    @Override
+    public User getUserById(int userId) {
+        Optional<User> foundUser = users.stream()
+                .filter(user -> user.getId() == userId)
+                .findFirst();
+        return foundUser.orElse(null);
     }
 }

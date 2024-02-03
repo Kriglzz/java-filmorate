@@ -8,6 +8,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Validated
 @lombok.Data
@@ -28,6 +30,7 @@ public class User {
     private String name;
     @lombok.NonNull
     private int id;
+    private Set<Integer> friends = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.id = generateId();
@@ -46,11 +49,17 @@ public class User {
         } else {
             return true;
         }
-
     }
 
-    Integer generateId() {
+    private Integer generateId() {
         return ++userCount;
     }
 
+    public void addFriend(int friendId) {
+        friends.add(friendId);
+    }
+
+    public void deleteFriend(int friendId) {
+        friends.remove(friendId);
+    }
 }
