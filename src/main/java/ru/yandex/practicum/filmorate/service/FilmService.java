@@ -32,24 +32,30 @@ public class FilmService {
     }
 
     public void giveLike(int userId, int filmId) {
+        log.info("Попытка пользователя {userId} поставить лайк фильму {filmId}.");
         Film film = inMemoryFilmStorage.getFilmById(filmId);
         if (film.getLikes()
                 .stream()
                 .anyMatch(id -> id == userId)) {
             System.out.println("Вы уже поставили Like этому фильму");
+            log.info("Пользователь {userId} не смог поставил лайк фильму {filmId}.");
         } else {
             film.giveLike(userId);
+            log.info("Пользователь {userId} поставил лайк фильму {filmId}.");
         }
     }
 
     public void deleteLike(int userId, int filmId) {
+        log.info("Попытка пользователя {userId} удалить лайк у фильма {filmId}.");
         Film film = inMemoryFilmStorage.getFilmById(filmId);
         if (film.getLikes()
                 .stream()
                 .anyMatch(id -> id == userId)) {
             film.deleteLike(userId);
+            log.info("Пользователь {userId} удалил лайк у фильма {filmId}.");
         } else {
             System.out.println("Вы еще не оставляли Like этому фильму");
+            log.info("Пользователь {userId} не смог удалить лайк у фильма {filmId}.");
         }
     }
 

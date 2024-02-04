@@ -17,12 +17,12 @@ public class UserService {
     private final InMemoryUserStorage inMemoryUserStorage;
 
     public User createUser(User user) {
-        log.info("Пользователь {} добавлен", user);
+        log.info("Пользователь {} добавлен.", user);
         return inMemoryUserStorage.createUser(user);
     }
 
     public User updateUser(User user) {
-        log.info("Пользователь {} обновлен", user);
+        log.info("Пользователь {} обновлен.", user);
         return inMemoryUserStorage.updateUser(user);
     }
 
@@ -31,6 +31,7 @@ public class UserService {
     }
 
     public void addFriend(int userId, int friendId) {
+        log.info("Пользователь {userId} добавил {friendId} в список друзей.");
         User user1 = inMemoryUserStorage.getUserById(userId);
         User user2 = inMemoryUserStorage.getUserById(friendId);
         user1.addFriend(friendId);
@@ -38,6 +39,7 @@ public class UserService {
     }
 
     public void deleteFriend(int userId, int friendId) {
+        log.info("Пользователь {userId} удалил {friendId} из списка друзей.");
         User user1 = inMemoryUserStorage.getUserById(userId);
         User user2 = inMemoryUserStorage.getUserById(friendId);
         user1.deleteFriend(friendId);
