@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -19,16 +21,15 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        for (User u : users) {
-            if (Objects.equals(u.getId(), user.getId())) {
-                users.remove(u);
-                break;
-            }
+        boolean userFound = users.stream().anyMatch(u -> Objects.equals(u.getId(), user.getId()));
+        if (userFound) {
+            users.removeIf(u -> Objects.equals(u.getId(), user.getId()));
+            users.add(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
-        users.add(user);
         return user;
     }
-
 
     @Override
     public ArrayList<User> getAllUsers() {
@@ -40,6 +41,6 @@ public class InMemoryUserStorage implements UserStorage {
         Optional<User> foundUser = users.stream()
                 .filter(user -> user.getId() == userId)
                 .findFirst();
-        return foundUser.orElse(null);
+        return foundUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
     }
 }

@@ -41,29 +41,29 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public void giveLike(int userId, int filmId) {
-        log.info("Попытка пользователя {userId} поставить лайк фильму {filmId}.");
+        log.info("Попытка пользователя {} поставить лайк фильму {}.", userId, filmId);
         Film film = inMemoryFilmStorage.getFilmById(filmId);
         if (film.getLikes()
                 .stream()
                 .anyMatch(id -> id == userId)) {
-            log.info("Пользователь {userId} не смог поставил лайк фильму {filmId}.");
+            log.info("Пользователь {} не смог поставил лайк фильму {}.", userId, filmId);
         } else {
             film.giveLike(userId);
-            log.info("Пользователь {userId} поставил лайк фильму {filmId}.");
+            log.info("Пользователь {} поставил лайк фильму {}.", userId, filmId);
         }
     }
 
     @Override
     public void deleteLike(int userId, int filmId) {
-        log.info("Попытка пользователя {userId} удалить лайк у фильма {filmId}.");
+        log.info("Попытка пользователя {} удалить лайк у фильма {}.", userId, filmId);
         Film film = inMemoryFilmStorage.getFilmById(filmId);
         if (film.getLikes()
                 .stream()
                 .anyMatch(id -> id == userId)) {
             film.deleteLike(userId);
-            log.info("Пользователь {userId} удалил лайк у фильма {filmId}.");
+            log.info("Пользователь {} удалил лайк у фильма {}.", userId, filmId);
         } else {
-            log.info("Пользователь {userId} не смог удалить лайк у фильма {filmId}.");
+            log.info("Пользователь {} не смог удалить лайк у фильма {}.", userId, filmId);
         }
     }
 

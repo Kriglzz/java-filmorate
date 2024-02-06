@@ -40,7 +40,7 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void addFriend(int userId, int friendId) {
-        log.info("Пользователь {userId} добавил {friendId} в список друзей.");
+        log.info("Пользователь {} добавил {} в список друзей.", userId, friendId);
         User user1 = inMemoryUserStorage.getUserById(userId);
         User user2 = inMemoryUserStorage.getUserById(friendId);
         user1.addFriend(friendId);
@@ -49,7 +49,7 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-        log.info("Пользователь {userId} удалил {friendId} из списка друзей.");
+        log.info("Пользователь {} удалил {} из списка друзей.", userId, friendId);
         User user1 = inMemoryUserStorage.getUserById(userId);
         User user2 = inMemoryUserStorage.getUserById(friendId);
         user1.deleteFriend(friendId);
@@ -62,7 +62,7 @@ public class InMemoryUserService implements UserService {
         ArrayList<User> friends = new ArrayList<>();
         for (int element : user.getFriends()) {
             User listUser = inMemoryUserStorage.getUserById(element);
-            friends.add(user);
+            friends.add(listUser);
         }
         return friends;
     }
