@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,17 +73,18 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public List<Film> getMostLikedFilms(Integer count) {
-        //старый код, который не убирал фильмы с 0 лайков
-        /*ArrayList<Film> films = inMemoryFilmStorage.getAllFilms();
+        log.info("Вывод топ {} популярных фильмов .", count);
+        ArrayList<Film> films = inMemoryFilmStorage.getAllFilms();
         Collections.sort(films,
                 Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed());
-        return films.subList(0, Math.min(films.size(), 10));*/
-        log.info("Вывод топ {} популярных фильмов .", count);
+        return films.subList(0, Math.min(films.size(), count));
+        //сортировка и вывод фильмов только с лайками, на случай чего
+        /*log.info("Вывод топ {} популярных фильмов .", count);
         List<Film> films = inMemoryFilmStorage.getAllFilms().stream()
                 .filter(film -> !film.getLikes()
                         .isEmpty()).sorted(Comparator
                         .comparingInt((Film film) -> film.getLikes().size())
                         .reversed()).collect(Collectors.toList());
-        return films.subList(0, Math.min(films.size(), count));
+        return films.subList(0, Math.min(films.size(), count));*/
     }
 }
