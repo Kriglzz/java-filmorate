@@ -33,7 +33,6 @@ public class User {
     private Set<Integer> friends = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
-        this.id = generateId();
         this.email = email;
         this.login = login;
         this.name = name;
@@ -51,7 +50,7 @@ public class User {
         }
     }
 
-    private Integer generateId() {
+    public Integer generateId() {
         return ++userCount;
     }
 

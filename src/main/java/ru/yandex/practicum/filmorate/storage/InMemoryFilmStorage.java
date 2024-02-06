@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -9,13 +10,16 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final ArrayList<Film> films = new ArrayList<>();
 
     @Override
     public Film addFilm(Film film) {
+        film.setId(film.generateId());
         films.add(film);
+        log.info("Фильм {} добавлен", film);
         return film;
     }
 

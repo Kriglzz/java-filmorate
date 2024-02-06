@@ -32,15 +32,13 @@ public class Film {
     private Set<Integer> likes = new HashSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
-
-        this.id = generateId();
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
     }
 
-    private Integer generateId() {
+    public Integer generateId() {
         return ++filmCount;
     }
 

@@ -18,7 +18,6 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public User createUser(User user) {
-        log.info("Пользователь {} добавлен.", user);
         return inMemoryUserStorage.createUser(user);
     }
 

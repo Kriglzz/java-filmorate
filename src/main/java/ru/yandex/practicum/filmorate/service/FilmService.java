@@ -18,6 +18,6 @@ public interface FilmService {
 
     public void deleteLike(int userId, int filmId);
 
-    public List<Film> getMostLikedFilms();
+    public List<Film> getMostLikedFilms(Integer count);
 
 }

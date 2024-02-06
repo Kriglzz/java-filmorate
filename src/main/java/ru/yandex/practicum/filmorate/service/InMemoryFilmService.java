@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -19,7 +22,6 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public Film addFilm(Film film) {
-        log.info("Фильм {} добавлен", film);
         return inMemoryFilmStorage.addFilm(film);
     }
 
@@ -47,6 +49,7 @@ public class InMemoryFilmService implements FilmService {
                 .stream()
                 .anyMatch(id -> id == userId)) {
             log.info("Пользователь {} не смог поставил лайк фильму {}.", userId, filmId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         } else {
             film.giveLike(userId);
             log.info("Пользователь {} поставил лайк фильму {}.", userId, filmId);
@@ -64,14 +67,23 @@ public class InMemoryFilmService implements FilmService {
             log.info("Пользователь {} удалил лайк у фильма {}.", userId, filmId);
         } else {
             log.info("Пользователь {} не смог удалить лайк у фильма {}.", userId, filmId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
     }
 
     @Override
-    public List<Film> getMostLikedFilms() {
-        ArrayList<Film> films = inMemoryFilmStorage.getAllFilms();
+    public List<Film> getMostLikedFilms(Integer count) {
+        //старый код, который не убирал фильмы с 0 лайков
+        /*ArrayList<Film> films = inMemoryFilmStorage.getAllFilms();
         Collections.sort(films,
                 Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed());
-        return films.subList(0, Math.min(films.size(), 10));
+        return films.subList(0, Math.min(films.size(), 10));*/
+        log.info("Вывод топ {} популярных фильмов .", count);
+        List<Film> films = inMemoryFilmStorage.getAllFilms().stream()
+                .filter(film -> !film.getLikes()
+                        .isEmpty()).sorted(Comparator
+                        .comparingInt((Film film) -> film.getLikes().size())
+                        .reversed()).collect(Collectors.toList());
+        return films.subList(0, Math.min(films.size(), count));
     }
 }
