@@ -7,9 +7,14 @@ import java.util.List;
 
 public interface FilmService {
     public Film addFilm(Film film);
+
     public Film updateFilm(Film film);
+
     public ArrayList<Film> getAllFilms();
+
     public void giveLike(int userId, int filmId);
+
     public void deleteLike(int userId, int filmId);
+
     public List<Film> getMostLikedFilms();
 }

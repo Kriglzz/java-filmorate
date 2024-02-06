@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 
-
 import javax.validation.ValidationException;
 import java.util.Map;
 

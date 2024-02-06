@@ -13,7 +13,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class InMemoryUserService implements UserService{
+public class InMemoryUserService implements UserService {
     private final InMemoryUserStorage inMemoryUserStorage;
 
     @Override

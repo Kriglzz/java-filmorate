@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class InMemoryFilmService implements FilmService{
+public class InMemoryFilmService implements FilmService {
     private final InMemoryFilmStorage inMemoryFilmStorage;
 
     @Override
