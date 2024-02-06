@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class FilmServiceTest {
+public class InMemoryFilmServiceTest {
     @Test
     public void testFindFilmById() {
         Film film = new Film("2007",

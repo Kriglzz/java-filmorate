@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.InMemoryUserService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -12,38 +12,38 @@ import java.util.ArrayList;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final InMemoryUserService inMemoryUserService;
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        return userService.createUser(user);
+        return inMemoryUserService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return userService.updateUser(user);
+        return inMemoryUserService.updateUser(user);
     }
 
     @GetMapping
     public ArrayList<User> getAllUsers() {
-        return userService.getAllUsers();
+        return inMemoryUserService.getAllUsers();
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable int userId,
                           @PathVariable int friendId) {
-        userService.addFriend(userId, friendId);
+        inMemoryUserService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable int userId,
                              @PathVariable int friendId) {
-        userService.deleteFriend(userId, friendId);
+        inMemoryUserService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/users/{userId}/friends/common/{otherId}")
     public ArrayList<User> getMutualFriends(@PathVariable int userId,
                                             @PathVariable int otherId) {
-        return userService.getMutualFriends(userId, otherId);
+        return inMemoryUserService.getMutualFriends(userId, otherId);
     }
 }
