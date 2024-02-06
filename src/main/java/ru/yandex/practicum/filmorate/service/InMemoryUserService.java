@@ -57,6 +57,17 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
+    public ArrayList<User> getFriends(int userId) {
+        User user = inMemoryUserStorage.getUserById(userId);
+        ArrayList<User> friends = new ArrayList<>();
+        for (int element : user.getFriends()) {
+            User listUser = inMemoryUserStorage.getUserById(element);
+            friends.add(user);
+        }
+        return friends;
+    }
+
+    @Override
     public ArrayList<User> getMutualFriends(int firstUserId, int secondUserId) {
         User user1 = inMemoryUserStorage.getUserById(firstUserId);
         User user2 = inMemoryUserStorage.getUserById(secondUserId);

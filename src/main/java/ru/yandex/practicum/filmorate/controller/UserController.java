@@ -46,6 +46,11 @@ public class UserController {
         inMemoryUserService.deleteFriend(userId, friendId);
     }
 
+    @GetMapping("/{userId}/friends")
+    public ArrayList<User> getFriends(@PathVariable int userId) {
+        return inMemoryUserService.getFriends(userId);
+    }
+
     @GetMapping("/{userId}/friends/common/{otherId}")
     public ArrayList<User> getMutualFriends(@PathVariable int userId,
                                             @PathVariable int otherId) {
