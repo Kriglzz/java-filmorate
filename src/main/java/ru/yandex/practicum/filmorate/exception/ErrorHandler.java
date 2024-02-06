@@ -48,4 +48,10 @@ public class ErrorHandler {
     public Map<String, String> handleHttpMessageNotReadableException(final HttpMessageNotReadableException e) {
         return Map.of("error", e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleUnknownUpdateException(final RuntimeException e) {
+        return Map.of("error", e.getMessage());
+    }
 }
