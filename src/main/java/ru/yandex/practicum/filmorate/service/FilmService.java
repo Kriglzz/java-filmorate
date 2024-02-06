@@ -10,6 +10,8 @@ public interface FilmService {
 
     public Film updateFilm(Film film);
 
+    public Film getFilmById(int filmId);
+
     public ArrayList<Film> getAllFilms();
 
     public void giveLike(int userId, int filmId);
@@ -17,4 +19,5 @@ public interface FilmService {
     public void deleteLike(int userId, int filmId);
 
     public List<Film> getMostLikedFilms();
+
 }

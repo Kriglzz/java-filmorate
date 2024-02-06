@@ -25,6 +25,11 @@ public class FilmController {
         return inMemoryFilmService.updateFilm(film);
     }
 
+    @GetMapping("/{filmId}")
+    public Film getFilmById(@PathVariable int filmId) {
+        return inMemoryFilmService.getFilmById(filmId);
+    }
+
     @GetMapping
     public ArrayList<Film> getAllFilms() {
         return inMemoryFilmService.getAllFilms();
@@ -36,7 +41,7 @@ public class FilmController {
         inMemoryFilmService.giveLike(userId, filmId);
     }
 
-    @DeleteMapping("/films/{filmId}/like/{userId}")
+    @DeleteMapping("/{filmId}/like/{userId}")
     public void deleteLike(@PathVariable int filmId,
                            @PathVariable int userId) {
         inMemoryFilmService.deleteLike(userId, filmId);

@@ -29,6 +29,11 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
+    public User getUserById(int userId) {
+        return inMemoryUserStorage.getUserById(userId);
+    }
+
+    @Override
     public ArrayList<User> getAllUsers() {
         return inMemoryUserStorage.getAllUsers();
     }

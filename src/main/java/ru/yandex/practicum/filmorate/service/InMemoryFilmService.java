@@ -30,6 +30,11 @@ public class InMemoryFilmService implements FilmService {
     }
 
     @Override
+    public Film getFilmById(int filmId) {
+        return inMemoryFilmStorage.getFilmById(filmId);
+    }
+
+    @Override
     public ArrayList<Film> getAllFilms() {
         return inMemoryFilmStorage.getAllFilms();
     }

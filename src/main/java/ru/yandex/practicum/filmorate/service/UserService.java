@@ -9,6 +9,8 @@ public interface UserService {
 
     public User updateUser(User user);
 
+    public User getUserById(int userId);
+
     public ArrayList<User> getAllUsers();
 
     public void addFriend(int userId, int friendId);

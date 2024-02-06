@@ -24,6 +24,11 @@ public class UserController {
         return inMemoryUserService.updateUser(user);
     }
 
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable int userId) {
+        return inMemoryUserService.getUserById(userId);
+    }
+
     @GetMapping
     public ArrayList<User> getAllUsers() {
         return inMemoryUserService.getAllUsers();
@@ -41,7 +46,7 @@ public class UserController {
         inMemoryUserService.deleteFriend(userId, friendId);
     }
 
-    @GetMapping("/users/{userId}/friends/common/{otherId}")
+    @GetMapping("/{userId}/friends/common/{otherId}")
     public ArrayList<User> getMutualFriends(@PathVariable int userId,
                                             @PathVariable int otherId) {
         return inMemoryUserService.getMutualFriends(userId, otherId);
