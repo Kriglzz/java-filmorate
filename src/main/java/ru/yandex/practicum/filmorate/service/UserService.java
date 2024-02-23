@@ -1,30 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dataBase.InMemoryUserDataBase;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 
-@Service
-@Slf4j
-@AllArgsConstructor
-public class UserService {
-    private final InMemoryUserDataBase inMemoryUserDataBase;
+public interface UserService {
+    public User createUser(User user);
 
-    public User createUser(User user) {
-        log.info("Пользователь {} добавлен", user);
-        return inMemoryUserDataBase.createUser(user);
-    }
+    public User updateUser(User user);
 
-    public User updateUser(User user) {
-        log.info("Пользователь {} обновлен", user);
-        return inMemoryUserDataBase.updateUser(user);
-    }
+    public User getUserById(int userId);
 
-    public ArrayList<User> getAllUsers() {
-        return inMemoryUserDataBase.getAllUsers();
-    }
+    public ArrayList<User> getAllUsers();
+
+    public void addFriend(int userId, int friendId);
+
+    public void deleteFriend(int userId, int friendId);
+
+    public ArrayList<User> getFriends(int userId);
+
+    public ArrayList<User> getMutualFriends(int firstUserId, int secondUserId);
 }
