@@ -30,16 +30,15 @@ public class Film {
     @Positive
     private int duration;
     private Set<Integer> likes = new HashSet<>();
+    private Set<Integer> genreIds;
+    private int mpaId; // А вот если бы в тз сразу было сказано, то все было бы лучше
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-    }
-
-    public Integer generateId() {
-        return ++filmCount;
+        this.mpaId = getMpaId();
     }
 
     public void giveLike(int userId) {
