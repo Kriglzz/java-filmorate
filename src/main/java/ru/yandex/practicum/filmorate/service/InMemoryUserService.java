@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,16 +39,24 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void addFriend(int userId, int friendId) {
-        log.info("Пользователь {} добавил {} в список друзей.", userId, friendId);
+        log.info("Пользователь {} пытается добавить {} в список друзей.", userId, friendId);
         User user1 = inMemoryUserStorage.getUserById(userId);
         User user2 = inMemoryUserStorage.getUserById(friendId);
-        user1.addFriend(friendId);
-        user2.addFriend(userId);
+        if (user2.getFriendStatus() != null
+                && user2.getFriendStatus().containsKey(userId)
+                && user2.getFriendStatus().get(userId).equals("friendshipRequested")) {
+            user1.addFriend(friendId);
+            user2.addFriend(userId);
+            log.info("Пользователи {} и {} добавили друг друга в друзья!", userId, friendId);
+        } else {
+            user1.addFriendRequest(friendId);
+            log.info("Пользователь {} отправил пользователю {} запрос на добавление в друзья.", userId, friendId);
+        }
     }
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-        log.info("Пользователь {} удалил {} из списка друзей.", userId, friendId);
+        log.info("Пользователь {} удаляет {} из списка друзей.", userId, friendId);
         User user1 = inMemoryUserStorage.getUserById(userId);
         User user2 = inMemoryUserStorage.getUserById(friendId);
         user1.deleteFriend(friendId);
