@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.*;
 
 @Slf4j
@@ -35,43 +36,50 @@ public class InMemoryFilmStorage implements FilmStorage {
             preparedStatement.setString(2, film.getDescription());
             preparedStatement.setTimestamp(3, Timestamp.valueOf(film.getReleaseDate().atStartOfDay()));
             preparedStatement.setInt(4, film.getDuration());
-            preparedStatement.setInt(5, (Integer) film.getMpa().get("id")); // А ВОТ ТУТАЧКИ ПРОБЛЕМА
+            Object mpaIdObject = film.getMpa().get("id");
+            if (mpaIdObject != null) {
+                preparedStatement.setInt(5, Integer.parseInt(String.valueOf(mpaIdObject)));
+            } else {
+                preparedStatement.setNull(5, Types.INTEGER);
+            }
             return preparedStatement;
         }, key);
         int id = key.getKey().intValue();
 
-        int mpaIdFromDB = jdbcTemplate
-                .queryForObject("SELECT MPA_id FROM film WHERE film_id = ?", Integer.class, id);
-        Map<String, Object> mapToInsert = new HashMap<>();
-        mapToInsert.put("id", mpaIdFromDB);
+        if (film.getMpa() != null && !film.getMpa().isEmpty()) {
+            int mpaIdFromDB = jdbcTemplate
+                    .queryForObject("SELECT MPA_id FROM film WHERE film_id = ?", Integer.class, id);
+            Map<String, Object> mapToInsert = new HashMap<>();
+            mapToInsert.put("id", mpaIdFromDB);
 
-        String mpaNameFromDB = jdbcTemplate
-                .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
-                        String.class, mpaIdFromDB);
-        mapToInsert.put("name", mpaNameFromDB);
-
-        film.setMpa(mapToInsert);
+            String mpaNameFromDB = jdbcTemplate
+                    .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
+                            String.class, mpaIdFromDB);
+            mapToInsert.put("name", mpaNameFromDB);
+            film.setMpa(mapToInsert);
+        }
         film.setId(id);
-        if (film.getGenreIds() != null) {
+        if (film.getGenreIds() != null && !film.getGenreIds().isEmpty()) {
             String insertGenresSql = "INSERT INTO film_genres(film_id, genre_id) VALUES (?, ?)";
             for (int genreId : film.getGenreIds()) {
                 jdbcTemplate.update(insertGenresSql, film.getId(), genreId);
             }
-
-            List<Integer> genreIds = jdbcTemplate.queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
-                    Integer.class, film.getId());
-            film.setGenreIds(new HashSet<>(genreIds));
-            Map<String, Object> genresMap = new HashMap<>();
-            ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
-            for (Integer genreId : genreIds) {
-                String genreName = jdbcTemplate
-                        .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
-                                String.class, genreId);
-                genresMap.put("id", genreId);
-                genresMap.put("name", genreName);
-                genresArray.add(genresMap);
+            if (film.getGenres() != null) {
+                List<Integer> genreIds = jdbcTemplate.queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
+                        Integer.class, film.getId());
+                film.setGenreIds(new HashSet<>(genreIds));
+                Map<String, Object> genresMap = new HashMap<>();
+                ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
+                for (Integer genreId : genreIds) {
+                    String genreName = jdbcTemplate
+                            .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
+                                    String.class, genreId);
+                    genresMap.put("id", genreId);
+                    genresMap.put("name", genreName);
+                    genresArray.add(genresMap);
+                }
+                film.setGenres(genresArray);
             }
-            film.setGenres(genresArray);
         }
         log.info("Фильм {} добавлен", film);
         Optional<Film> addedFilm = Optional.of(film);
@@ -97,7 +105,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().get("id"),
                 film.getId());
-        if (film.getGenreIds() != null) {
+        if (film.getGenreIds() != null && !film.getGenreIds().isEmpty()) {
             String deleteGenresSql = "DELETE FROM film_genre WHERE film_id=?";
             jdbcTemplate.update(deleteGenresSql, film.getId());
 
@@ -137,16 +145,17 @@ public class InMemoryFilmStorage implements FilmStorage {
                     filmRows.getDate("release_date").toLocalDate(),
                     filmRows.getInt("duration"));
             film.setId(filmRows.getInt("film_id"));
+            if (film.getMpa() != null && !film.getMpa().isEmpty()) {
+                Map<String, Object> mapToInsert = new HashMap<>();
+                mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
-            Map<String, Object> mapToInsert = new HashMap<>();
-            mapToInsert.put("id", filmRows.getInt("MPA_id"));
+                String mpaNameFromDB = jdbcTemplate
+                        .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
+                                String.class, filmRows.getInt("MPA_id"));
+                mapToInsert.put("name", mpaNameFromDB);
 
-            String mpaNameFromDB = jdbcTemplate
-                    .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
-                            String.class, filmRows.getInt("MPA_id"));
-            mapToInsert.put("name", mpaNameFromDB);
-
-            film.setMpa(mapToInsert);
+                film.setMpa(mapToInsert);
+            }
             films.add(film);
         }
         return films;
@@ -164,15 +173,16 @@ public class InMemoryFilmStorage implements FilmStorage {
                     filmRows.getInt("duration")
             );
             film.setId(filmRows.getInt("film_id"));
-            Map<String, Object> mapToInsert = new HashMap<>();
-            mapToInsert.put("id", filmRows.getInt("MPA_id"));
+            if (film.getMpa() != null && !film.getMpa().isEmpty()) {
+                Map<String, Object> mapToInsert = new HashMap<>();
+                mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
-            String mpaNameFromDB = jdbcTemplate
-                    .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
-                            String.class, filmRows.getInt("MPA_id"));
-            mapToInsert.put("name", mpaNameFromDB);
-
-            film.setMpa(mapToInsert);
+                String mpaNameFromDB = jdbcTemplate
+                        .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
+                                String.class, filmRows.getInt("MPA_id"));
+                mapToInsert.put("name", mpaNameFromDB);
+                film.setMpa(mapToInsert);
+            }
 
             List<Integer> genreIds = jdbcTemplate.queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
                     Integer.class, film.getId());
