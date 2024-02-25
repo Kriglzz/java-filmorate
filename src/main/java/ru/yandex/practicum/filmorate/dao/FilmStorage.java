@@ -8,21 +8,21 @@ import java.util.Map;
 
 public interface FilmStorage {
 
-    public Film addFilm(Film film);
+    Film addFilm(Film film);
 
-    public Film updateFilm(Film film);
+    Film updateFilm(Film film);
 
-    public ArrayList<Film> getAllFilms();
+    ArrayList<Film> getAllFilms();
 
-    public Film getFilmById(int filmId);
+    Film getFilmById(int filmId);
 
-    public void deleteFilm(int filmId);
+    void deleteFilm(int filmId);
 
-    public Map<Integer, String> getMpa();
+    Map<Integer, String> getMpa();
 
-    public Map<Integer, String> getMpaById(int genreId);
+    Map<Integer, String> getMpaById(int genreId);
 
-    public Map<Integer, String> getGenres();
+    Map<Integer, String> getGenres();
 
-    public Map<Integer, String> getGenreById(int genreId);
+    Map<Integer, String> getGenreById(int genreId);
 }
