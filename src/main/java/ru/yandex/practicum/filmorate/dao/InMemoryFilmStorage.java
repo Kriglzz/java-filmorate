@@ -35,14 +35,14 @@ public class InMemoryFilmStorage implements FilmStorage {
             preparedStatement.setString(2, film.getDescription());
             preparedStatement.setTimestamp(3, Timestamp.valueOf(film.getReleaseDate().atStartOfDay()));
             preparedStatement.setInt(4, film.getDuration());
-            preparedStatement.setInt(5, (Integer)film.getMpa().get("id")); // А ВОТ ТУТАЧКИ ПРОБЛЕМА
+            preparedStatement.setInt(5, (Integer) film.getMpa().get("id")); // А ВОТ ТУТАЧКИ ПРОБЛЕМА
             return preparedStatement;
         }, key);
         int id = key.getKey().intValue();
 
         int mpaIdFromDB = jdbcTemplate
                 .queryForObject("SELECT MPA_id FROM film WHERE film_id = ?", Integer.class, id);
-        Map <String, Object> mapToInsert = new HashMap<>();
+        Map<String, Object> mapToInsert = new HashMap<>();
         mapToInsert.put("id", mpaIdFromDB);
 
         String mpaNameFromDB = jdbcTemplate
@@ -63,7 +63,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setGenreIds(new HashSet<>(genreIds));
             Map<String, Object> genresMap = new HashMap<>();
             ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
-            for (Integer genreId : genreIds){
+            for (Integer genreId : genreIds) {
                 String genreName = jdbcTemplate
                         .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
                                 String.class, genreId);
@@ -111,7 +111,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setGenreIds(new HashSet<>(genreIds));
             Map<String, Object> genresMap = new HashMap<>();
             ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
-            for (Integer genreId : genreIds){
+            for (Integer genreId : genreIds) {
                 String genreName = jdbcTemplate
                         .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
                                 String.class, genreId);
@@ -138,7 +138,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                     filmRows.getInt("duration"));
             film.setId(filmRows.getInt("film_id"));
 
-            Map <String, Object> mapToInsert = new HashMap<>();
+            Map<String, Object> mapToInsert = new HashMap<>();
             mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
             String mpaNameFromDB = jdbcTemplate
@@ -164,7 +164,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                     filmRows.getInt("duration")
             );
             film.setId(filmRows.getInt("film_id"));
-            Map <String, Object> mapToInsert = new HashMap<>();
+            Map<String, Object> mapToInsert = new HashMap<>();
             mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
             String mpaNameFromDB = jdbcTemplate
@@ -179,7 +179,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setGenreIds(new HashSet<>(genreIds));
             Map<String, Object> genresMap = new HashMap<>();
             ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
-            for (Integer genreId : genreIds){
+            for (Integer genreId : genreIds) {
                 String genreName = jdbcTemplate
                         .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
                                 String.class, genreId);
