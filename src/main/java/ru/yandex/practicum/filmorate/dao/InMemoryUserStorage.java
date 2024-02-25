@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -55,8 +56,9 @@ public class InMemoryUserStorage implements UserStorage {
             }
             user.setFriendStatus(friendStatus);
         }
+        Optional<User> createdUser = Optional.of(user);
         log.info("Пользователь {} добавлен", user);
-        return user;
+        return createdUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     private void checkUser(int userId) {
@@ -87,7 +89,8 @@ public class InMemoryUserStorage implements UserStorage {
                 jdbcTemplate.update(insertFriends, user.getId(), entry.getKey(), entry.getValue());
             }
         }
-        return user;
+        Optional<User> updatedUser = Optional.of(user);
+        return updatedUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -113,23 +116,25 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(int userId) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE user_id = ? " +
-                "group by user_id", userId);
-        if (userRows.next()) {
-            User user = new User(userRows.getString("email"),
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE user_id = ?", userId);
+        while (userRows.next()) {
+            User user = new User(
+                    userRows.getString("email"),
                     userRows.getString("login"),
                     userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate());
+                    userRows.getDate("birthday").toLocalDate()
+            );
             user.setId(userRows.getInt("user_id"));
+
             if (user.getFriendStatus() != null) {
                 String insertFriends = "INSERT INTO friends(user_id, friends_id, status) values (?, ?, ?)";
                 for (Map.Entry<Integer, String> entry : user.getFriendStatus().entrySet()) {
                     jdbcTemplate.update(insertFriends, user.getId(), entry.getKey(), entry.getValue());
                 }
             }
-            return user;
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+            Optional<User> foundUser = Optional.of(user);
+            return foundUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

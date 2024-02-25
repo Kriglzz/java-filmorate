@@ -75,14 +75,6 @@ public class InMemoryFilmService implements FilmService {
         Collections.sort(films,
                 Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed());
         return films.subList(0, Math.min(films.size(), count));
-        //сортировка и вывод фильмов только с лайками, на случай чего
-        /*log.info("Вывод топ {} популярных фильмов .", count);
-        List<Film> films = inMemoryFilmStorage.getAllFilms().stream()
-                .filter(film -> !film.getLikes()
-                        .isEmpty()).sorted(Comparator
-                        .comparingInt((Film film) -> film.getLikes().size())
-                        .reversed()).collect(Collectors.toList());
-        return films.subList(0, Math.min(films.size(), count));*/
     }
 
     @Override
@@ -102,20 +94,24 @@ public class InMemoryFilmService implements FilmService {
     @Override
     public Map<String, Object> getMpaById(int mpaId) {
         log.info("Вывод рейтинга Ассоциации кинокомпаний с id {}", mpaId);
-        Map<Integer, String> mpaMap = inMemoryFilmStorage.getMpa();
-        Map<String, Object> mpaInfo = new HashMap<>();
-        for (Map.Entry<Integer, String> entry : mpaMap.entrySet()) {
-            mpaInfo.put("id", entry.getKey());
-            mpaInfo.put("name", entry.getValue());
+        Map<Integer, String> mpaMap = inMemoryFilmStorage.getMpaById(mpaId);
+        if (!mpaMap.isEmpty()) {
+            Map<String, Object> mpaInfo = new HashMap<>();
+            for (Map.Entry<Integer, String> entry : mpaMap.entrySet()) {
+                mpaInfo.put("id", entry.getKey());
+                mpaInfo.put("name", entry.getValue());
+            }
+            return mpaInfo;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Рейтинг Ассоциации не найден.");
         }
-        return mpaInfo;
     }
 
     @Override
     public List<Map<String, Object>> getGenres() {
         log.info("Вывод всех жанров и их id");
         List<Map<String, Object>> result = new ArrayList<>();
-        Map<Integer, String> genreMap = inMemoryFilmStorage.getMpa();
+        Map<Integer, String> genreMap = inMemoryFilmStorage.getGenres();
         for (Map.Entry<Integer, String> entry : genreMap.entrySet()) {
             Map<String, Object> genreInfo = new HashMap<>();
             genreInfo.put("id", entry.getKey());
@@ -128,13 +124,17 @@ public class InMemoryFilmService implements FilmService {
     @Override
     public Map<String, Object> getGenreById(int genreId) {
         log.info("Вывод конкретного жанра с id {}", genreId);
-        Map<Integer, String> genreMap = inMemoryFilmStorage.getMpa();
-        Map<String, Object> genreInfo = new HashMap<>();
-        for (Map.Entry<Integer, String> entry : genreMap.entrySet()) {
-            genreInfo.put("id", entry.getKey());
-            genreInfo.put("name", entry.getValue());
+        Map<Integer, String> genreMap = inMemoryFilmStorage.getGenreById(genreId);
+        if (!genreMap.isEmpty()) {
+            Map<String, Object> genreInfo = new HashMap<>();
+            for (Map.Entry<Integer, String> entry : genreMap.entrySet()) {
+                genreInfo.put("id", entry.getKey());
+                genreInfo.put("name", entry.getValue());
+            }
+            return genreInfo;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр не найден.");
         }
-        return genreInfo;
     }
 
 }

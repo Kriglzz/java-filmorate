@@ -52,7 +52,8 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setGenreIds(new HashSet<>(genreIds));
         }
         log.info("Фильм {} добавлен", film);
-        return film;
+        Optional<Film> addedFilm = Optional.of(film);
+        return addedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     private void checkFilm(int filmId) {
@@ -76,7 +77,8 @@ public class InMemoryFilmStorage implements FilmStorage {
                 film.getMpaId());
         String deleteGenresSql = "DELETE FROM film_genre WHERE film_id=?";
         jdbcTemplate.update(deleteGenresSql, film.getId());
-        return film;
+        Optional<Film> updatedFilm = Optional.of(film);
+        return updatedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -97,19 +99,21 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int filmId) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM film WHERE film_id = ? " +
-                "group by film_id", filmId);
-        if (filmRows.next()) {
-            Film film = new Film(filmRows.getString("name"),
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM film WHERE film_id = ?", filmId);
+
+        while (filmRows.next()) {
+            Film film = new Film(
+                    filmRows.getString("name"),
                     filmRows.getString("description"),
                     filmRows.getDate("release_date").toLocalDate(),
-                    filmRows.getInt("duration"));
+                    filmRows.getInt("duration")
+            );
             film.setId(filmRows.getInt("film_id"));
             film.setMpaId(filmRows.getInt("MPA_id"));
-            return film;
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+            Optional<Film> foundFilm = Optional.of(film);
+            return foundFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден"));
         }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
     }
 
     @Override
@@ -137,7 +141,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         while (mpaFromRow.next()) {
             mpaMap.put(mpaFromRow.getInt("MPA_id"), mpaFromRow.getString("MPA_name"));
         }
-        return mpaMap;
+        Optional<Map<Integer, String>> foundMpa = Optional.of(mpaMap);
+        return foundMpa.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Рейтинг не найден"));
     }
 
     @Override
@@ -158,6 +163,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         while (genreFromRow.next()) {
             genreMap.put(genreFromRow.getInt("genre_id"), genreFromRow.getString("genre_name"));
         }
-        return genreMap;
+        Optional<Map<Integer, String>> foundGenre = Optional.of(genreMap);
+        return foundGenre.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр не найден"));
     }
 }
