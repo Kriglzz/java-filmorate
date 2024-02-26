@@ -199,7 +199,6 @@ public class FilmDBStorage implements FilmStorage {
             Map<String, Object> mapToInsert = new HashMap<>();
             mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
-
             String mpaNameFromDB = jdbcTemplate
                     .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
                             String.class, filmRows.getInt("MPA_id"));
@@ -314,8 +313,8 @@ public class FilmDBStorage implements FilmStorage {
     private void insertFilmLikes(Film film) {
         String insertLikesSql = "INSERT INTO likes(film_id, user_id) VALUES (?, ?)";
         if (!film.getLikes().isEmpty()) {
-            for (int user_id : film.getLikes()) {
-                jdbcTemplate.update(insertLikesSql, film.getId(), user_id);
+            for (int userId : film.getLikes()) {
+                jdbcTemplate.update(insertLikesSql, film.getId(), userId);
             }
         } else {
             jdbcTemplate.update(insertLikesSql, film.getId(), null);
