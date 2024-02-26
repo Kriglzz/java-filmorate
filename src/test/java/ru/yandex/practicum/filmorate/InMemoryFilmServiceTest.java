@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.dao.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -23,9 +23,9 @@ public class InMemoryFilmServiceTest {
                 "Give me back my 2007",
                 LocalDate.of(2007, 7, 7),
                 100);
-        InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage(jdbcTemplate);
-        inMemoryFilmStorage.addFilm(film);
-        Film savedFilm = inMemoryFilmStorage.getFilmById(film.getId());
+        FilmDBStorage filmDBStorage = new FilmDBStorage(jdbcTemplate);
+        filmDBStorage.addFilm(film);
+        Film savedFilm = filmDBStorage.getFilmById(film.getId());
         assertThat(savedFilm)
                 .isNotNull()
                 .usingRecursiveComparison()

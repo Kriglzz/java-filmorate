@@ -18,10 +18,10 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class InMemoryFilmStorage implements FilmStorage {
+public class FilmDBStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public InMemoryFilmStorage(JdbcTemplate jdbcTemplate) {
+    public FilmDBStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

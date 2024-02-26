@@ -20,10 +20,10 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage {
+public class UserDBStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public InMemoryUserStorage(JdbcTemplate jdbcTemplate) {
+    public UserDBStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

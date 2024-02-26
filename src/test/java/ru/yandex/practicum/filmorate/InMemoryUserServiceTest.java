@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.dao.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dao.UserDBStorage;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -24,9 +24,9 @@ public class InMemoryUserServiceTest {
                 "MoneyLover",
                 "Todd",
                 LocalDate.of(1970, 10, 6));
-        InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage(jdbcTemplate);
-        inMemoryUserStorage.createUser(user);
-        User savedUser = inMemoryUserStorage.getUserById(user.getId());
+        UserDBStorage userDBStorage = new UserDBStorage(jdbcTemplate);
+        userDBStorage.createUser(user);
+        User savedUser = userDBStorage.getUserById(user.getId());
         assertThat(savedUser)
                 .isNotNull()
                 .usingRecursiveComparison()
