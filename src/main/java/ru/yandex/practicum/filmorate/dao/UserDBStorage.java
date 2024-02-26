@@ -129,19 +129,19 @@ public class UserDBStorage implements UserStorage {
                     userRows.getDate("birthday").toLocalDate()
             );
             user.setId(userRows.getInt("user_id"));
+
+
             SqlRowSet friendsRows = jdbcTemplate
                     .queryForRowSet("SELECT friends_id, status FROM friends WHERE user_id = ?", userId);
             HashMap<Integer, String> userFriends = new HashMap<>();
+
             while (friendsRows.next()) {
                 int userFriendsId = friendsRows.getInt("friends_id");
                 String friendStatus = friendsRows.getString("status");
                 userFriends.put(userFriendsId, friendStatus);
             }
+
             user.setFriendStatus(userFriends);
-                /*String insertFriends = "INSERT INTO friends(user_id, friends_id, status) values (?, ?, ?)";
-                for (Map.Entry<Integer, String> entry : user.getFriendStatus().entrySet()) {
-                    jdbcTemplate.update(insertFriends, user.getId(), entry.getKey(), entry.getValue());
-                }*/
             Optional<User> foundUser = Optional.of(user);
             return foundUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         }

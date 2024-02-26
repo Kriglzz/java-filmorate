@@ -81,6 +81,9 @@ public class FilmDBStorage implements FilmStorage {
                 film.setGenres(genresArray);
             }
         }
+        if (film.getLikes() != null) {
+            insertFilmLikes(film);
+        }
         log.info("Фильм {} добавлен", film);
         Optional<Film> addedFilm = Optional.of(film);
         return addedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -105,32 +108,29 @@ public class FilmDBStorage implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().get("id"),
                 film.getId());
-        if (film.getGenreIds() != null && !film.getGenreIds().isEmpty()) {
-            String deleteGenresSql = "DELETE FROM film_genre WHERE film_id=?";
-            jdbcTemplate.update(deleteGenresSql, film.getId());
 
-            String insertGenres = "INSERT INTO film_genre(film_id, genre_id) VALUES (?, ?)";
-            Set<Integer> setToInsert = new HashSet<>();
-            setToInsert.addAll(film.getGenreIds());
-            jdbcTemplate.update(insertGenres, film.getId(), setToInsert);
+        String deleteGenresSql = "DELETE FROM film_genres WHERE film_id=?";
+        jdbcTemplate.update(deleteGenresSql, film.getId());
 
-            List<Integer> genreIds = jdbcTemplate.queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
-                    Integer.class, film.getId());
-            film.setGenreIds(new HashSet<>(genreIds));
-            Map<String, Object> genresMap = new HashMap<>();
-            ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
-            for (Integer genreId : genreIds) {
-                String genreName = jdbcTemplate
-                        .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
-                                String.class, genreId);
-                genresMap.put("id", genreId);
-                genresMap.put("name", genreName);
-                genresArray.add(genresMap);
+        String insertGenres = "INSERT INTO film_genres(film_id, genre_id) VALUES (?, ?)";
+        ArrayList<Map<String, Object>> genresArray = film.getGenres();
+
+        for (Map<String, Object> map : genresArray) {
+            Integer genreId = (Integer) map.get("id");
+
+            String checkGenreSql = "SELECT COUNT(*) FROM film_genres WHERE film_id=? AND genre_id=?";
+            int count = jdbcTemplate.queryForObject(checkGenreSql, Integer.class, film.getId(), genreId);
+
+            if (count == 0) {
+                jdbcTemplate.update(insertGenres, film.getId(), genreId);
             }
-            film.setGenres(genresArray);
-
         }
 
+
+        String deleteLikesSql = "DELETE FROM likes WHERE film_id=?";
+        jdbcTemplate.update(deleteLikesSql, film.getId());
+
+        insertFilmLikes(film);
         Optional<Film> updatedFilm = Optional.of(film);
         return updatedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -140,22 +140,45 @@ public class FilmDBStorage implements FilmStorage {
         ArrayList<Film> films = new ArrayList<>();
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM film");
         while (filmRows.next()) {
-            Film film = new Film(filmRows.getString("name"),
+            Film film = new Film(
+                    filmRows.getString("name"),
                     filmRows.getString("description"),
                     filmRows.getDate("release_date").toLocalDate(),
                     filmRows.getInt("duration"));
+
             film.setId(filmRows.getInt("film_id"));
-            if (film.getMpa() != null && !film.getMpa().isEmpty()) {
-                Map<String, Object> mapToInsert = new HashMap<>();
-                mapToInsert.put("id", filmRows.getInt("MPA_id"));
+            Map<String, Object> mapToInsert = new HashMap<>();
+            mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
-                String mpaNameFromDB = jdbcTemplate
-                        .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
-                                String.class, filmRows.getInt("MPA_id"));
-                mapToInsert.put("name", mpaNameFromDB);
 
-                film.setMpa(mapToInsert);
+            String mpaNameFromDB = jdbcTemplate
+                    .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
+                            String.class, filmRows.getInt("MPA_id"));
+            mapToInsert.put("name", mpaNameFromDB);
+            film.setMpa(mapToInsert);
+
+            List<Integer> genreIds = jdbcTemplate
+                    .queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
+                            Integer.class, film.getId());
+            film.setGenreIds(new HashSet<>(genreIds));
+
+            ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
+            for (Integer genreId : genreIds) {
+                Map<String, Object> genresMap = new HashMap<>();
+                String genreName = jdbcTemplate
+                        .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?", String.class, genreId);
+                genresMap.put("id", genreId);
+                genresMap.put("name", genreName);
+                genresArray.add(genresMap);
             }
+            film.setGenres(genresArray);
+
+
+            List<Integer> likesFromDB = jdbcTemplate
+                    .queryForList("SELECT user_id FROM likes WHERE film_id = ?",
+                            Integer.class, film.getId());
+            film.setLikes(new HashSet<>(likesFromDB));
+
             films.add(film);
         }
         return films;
@@ -170,38 +193,41 @@ public class FilmDBStorage implements FilmStorage {
                     filmRows.getString("name"),
                     filmRows.getString("description"),
                     filmRows.getDate("release_date").toLocalDate(),
-                    filmRows.getInt("duration")
-            );
+                    filmRows.getInt("duration"));
+
             film.setId(filmRows.getInt("film_id"));
-            if (film.getMpa() != null && !film.getMpa().isEmpty()) {
-                Map<String, Object> mapToInsert = new HashMap<>();
-                mapToInsert.put("id", filmRows.getInt("MPA_id"));
+            Map<String, Object> mapToInsert = new HashMap<>();
+            mapToInsert.put("id", filmRows.getInt("MPA_id"));
 
-                String mpaNameFromDB = jdbcTemplate
-                        .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
-                                String.class, filmRows.getInt("MPA_id"));
-                mapToInsert.put("name", mpaNameFromDB);
-                film.setMpa(mapToInsert);
-            }
 
-            List<Integer> genreIds = jdbcTemplate.queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
-                    Integer.class, film.getId());
+            String mpaNameFromDB = jdbcTemplate
+                    .queryForObject("SELECT MPA_name FROM motion_picture_association WHERE MPA_id = ?",
+                            String.class, filmRows.getInt("MPA_id"));
+            mapToInsert.put("name", mpaNameFromDB);
+            film.setMpa(mapToInsert);
+
+            List<Integer> genreIds = jdbcTemplate
+                    .queryForList("SELECT genre_id FROM film_genres WHERE film_id = ?",
+                            Integer.class, film.getId());
             film.setGenreIds(new HashSet<>(genreIds));
-            Map<String, Object> genresMap = new HashMap<>();
+
             ArrayList<Map<String, Object>> genresArray = new ArrayList<>();
             for (Integer genreId : genreIds) {
+                Map<String, Object> genresMap = new HashMap<>();
                 String genreName = jdbcTemplate
-                        .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?",
-                                String.class, genreId);
+                        .queryForObject("SELECT genre_name FROM genres WHERE genre_id = ?", String.class, genreId);
                 genresMap.put("id", genreId);
                 genresMap.put("name", genreName);
                 genresArray.add(genresMap);
             }
             film.setGenres(genresArray);
 
+            insertFilmLikes(film);
+
             Optional<Film> foundFilm = Optional.of(film);
             return foundFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден"));
         }
+
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
     }
 
@@ -254,5 +280,46 @@ public class FilmDBStorage implements FilmStorage {
         }
         Optional<Map<Integer, String>> foundGenre = Optional.of(genreMap);
         return foundGenre.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр не найден"));
+    }
+
+    @Override
+    public Set<Integer> giveLike(int userId, int filmId) {
+
+        Set<Integer> likes = new HashSet<>();
+        likes.add(userId);
+
+        Film film = getFilmById(filmId);
+        if (film.getLikes() == null) {
+            film.setLikes(new HashSet<>());
+        }
+
+        return likes;
+    }
+
+    public Set<Integer> deleteLike(int userId, int filmId) {
+        String deleteLike = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
+        jdbcTemplate.update(deleteLike, userId, filmId);
+
+        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("SELECT user_id FROM likes WHERE film_id = ?", filmId);
+        Set<Integer> likes = new HashSet<>();
+
+        Film film = getFilmById(filmId);
+        if (film.getLikes() == null) {
+            film.setLikes(new HashSet<>());
+        }
+        return likes;
+    }
+
+
+    private void insertFilmLikes(Film film) {
+        String insertLikesSql = "INSERT INTO likes(film_id, user_id) VALUES (?, ?)";
+        if (!film.getLikes().isEmpty()) {
+            for (int user_id : film.getLikes()) {
+                jdbcTemplate.update(insertLikesSql, film.getId(), user_id);
+            }
+        } else {
+            jdbcTemplate.update(insertLikesSql, film.getId(), null);
+        }
+
     }
 }

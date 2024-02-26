@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 
 public interface FilmStorage {
@@ -25,4 +26,8 @@ public interface FilmStorage {
     Map<Integer, String> getGenres();
 
     Map<Integer, String> getGenreById(int genreId);
+
+    Set<Integer> giveLike(int userId, int filmId);
+
+    Set<Integer> deleteLike(int userId, int filmId);
 }

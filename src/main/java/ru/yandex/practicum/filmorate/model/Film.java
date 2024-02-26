@@ -40,12 +40,4 @@ public class Film {
         this.duration = duration;
     }
 
-    public void giveLike(int userId) {
-        likes.add(userId);
-    }
-
-    public void deleteLike(int userId) {
-        likes.remove(userId);
-    }
-
 }

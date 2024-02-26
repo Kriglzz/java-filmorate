@@ -41,14 +41,17 @@ public class InMemoryFilmService implements FilmService {
     public void giveLike(int userId, int filmId) {
         log.info("Попытка пользователя {} поставить лайк фильму {}.", userId, filmId);
         Film film = filmDBStorage.getFilmById(filmId);
+        Set<Integer> likes = film.getLikes();
+        likes.add(userId);
+        film.setLikes(likes);
         if (film.getLikes()
                 .stream()
-                .anyMatch(id -> id == userId)) {
+                .anyMatch(id -> id == userId) && userId > 0) {
+            log.info("Пользователь {} поставил лайк фильму {}.", userId, filmId);
+            filmDBStorage.updateFilm(film);
+        } else {
             log.info("Пользователь {} не смог поставил лайк фильму {}.", userId, filmId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
-        } else {
-            film.giveLike(userId);
-            log.info("Пользователь {} поставил лайк фильму {}.", userId, filmId);
         }
     }
 
@@ -56,11 +59,13 @@ public class InMemoryFilmService implements FilmService {
     public void deleteLike(int userId, int filmId) {
         log.info("Попытка пользователя {} удалить лайк у фильма {}.", userId, filmId);
         Film film = filmDBStorage.getFilmById(filmId);
+        Set<Integer> likes = film.getLikes();
+        likes.remove(userId);
+        film.setLikes(likes);
         if (film.getLikes()
                 .stream()
-                .anyMatch(id -> id == userId)) {
-            film.deleteLike(userId);
-            filmDBStorage.deleteFilm(filmId);
+                .anyMatch(id -> id == userId) && userId > 0) {
+            filmDBStorage.deleteLike(userId, filmId);
             log.info("Пользователь {} удалил лайк у фильма {}.", userId, filmId);
         } else {
             log.info("Пользователь {} не смог удалить лайк у фильма {}.", userId, filmId);
@@ -72,9 +77,10 @@ public class InMemoryFilmService implements FilmService {
     public List<Film> getMostLikedFilms(Integer count) {
         log.info("Вывод топ {} популярных фильмов .", count);
         ArrayList<Film> films = filmDBStorage.getAllFilms();
-        Collections.sort(films,
-                Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed());
+        films.sort(Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed());
         return films.subList(0, Math.min(films.size(), count));
+
+
     }
 
     @Override
