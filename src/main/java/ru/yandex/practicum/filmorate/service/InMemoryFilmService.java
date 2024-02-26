@@ -23,7 +23,7 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public Film updateFilm(Film film) {
-        log.info("Фильм {} обновлен", film);
+        log.info("Обновляется фильм {}.", film);
         return filmDBStorage.updateFilm(film);
     }
 

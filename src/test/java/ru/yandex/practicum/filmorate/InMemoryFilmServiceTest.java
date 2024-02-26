@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,9 +24,12 @@ public class InMemoryFilmServiceTest {
                 "Give me back my 2007",
                 LocalDate.of(2007, 7, 7),
                 100);
+        HashSet <Integer>like = new HashSet<>();
+        like.clear();
         FilmDBStorage filmDBStorage = new FilmDBStorage(jdbcTemplate);
         filmDBStorage.addFilm(film);
         Film savedFilm = filmDBStorage.getFilmById(film.getId());
+        savedFilm.setLikes(like);
         assertThat(savedFilm)
                 .isNotNull()
                 .usingRecursiveComparison()

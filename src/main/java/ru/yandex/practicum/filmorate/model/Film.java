@@ -6,7 +6,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Film.
@@ -29,8 +32,7 @@ public class Film {
     @Positive
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-    private ArrayList<Map<String, Object>> genres = new ArrayList<>();
-    private Set<Integer> genreIds = new HashSet<>();
+    private HashSet<Map<String, Object>> genres = new HashSet<>();
     private Map<String, Object> mpa = new HashMap<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
