@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.AfterDate;
 
 import javax.validation.constraints.NotBlank;
@@ -32,14 +34,28 @@ public class Film {
     @Positive
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-    private HashSet<Map<String, Object>> genres = new HashSet<>();
-    private Map<String, Object> mpa = new HashMap<>();
+    @JsonProperty("mpa")
+    private MpaWrap mpa;
+    @JsonProperty("genres")
+    private Set<GenreWrap> genres = new HashSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+    }
+
+    @Data
+    public static class MpaWrap {
+        private int id;
+        private String name;
+    }
+
+    @Data
+    public static class GenreWrap {
+        private int id;
+        private String name;
     }
 
 }
