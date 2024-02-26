@@ -9,9 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @Validated
 @lombok.Data
@@ -32,7 +30,6 @@ public class User {
     private String name;
     @lombok.NonNull
     private int id;
-    private Set<Integer> friends = new HashSet<>();
     private Map<Integer, String> friendStatus = new HashMap<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
@@ -51,20 +48,5 @@ public class User {
         } else {
             return true;
         }
-    }
-
-
-    public void addFriendRequest(int friendId) {
-        friendStatus.put(friendId, "friendshipRequested");
-    }
-
-    public void addFriend(int friendId) {
-        friends.add(friendId);
-        friendStatus.put(friendId, "isFriend");
-    }
-
-    public void deleteFriend(int friendId) {
-        friends.remove(friendId);
-        friendStatus.put(friendId, "notFriend");
     }
 }

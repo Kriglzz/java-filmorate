@@ -42,6 +42,7 @@ public class UserDBStorage implements UserStorage {
         int id = key.getKey().intValue();
         user.setId(id);
 
+
         if (user.getFriendStatus() != null) {
             String insertFriends = "INSERT INTO friends(user_id, users_id, status) VALUES (?, ?, ?)";
             for (Map.Entry<Integer, String> entry : user.getFriendStatus().entrySet()) {
@@ -55,6 +56,9 @@ public class UserDBStorage implements UserStorage {
                 friendStatus.put(friendRows.getInt("friends_id"), friendRows.getString("status"));
             }
             user.setFriendStatus(friendStatus);
+            if (user.getFriendStatus() == null) {
+                user.setFriendStatus(new HashMap<>());
+            }
         }
         Optional<User> createdUser = Optional.of(user);
         log.info("Пользователь {} добавлен", user);
@@ -84,7 +88,7 @@ public class UserDBStorage implements UserStorage {
             String deleteFriends = "DELETE FROM friends WHERE user_id=?";
             jdbcTemplate.update(deleteFriends, user.getId());
 
-            String insertFriends = "INSERT INTO friends(user_id, users_id, status) VALUES (?, ?, ?)";
+            String insertFriends = "INSERT INTO friends(user_id, friends_id, status) VALUES (?, ?, ?)";
             for (Map.Entry<Integer, String> entry : user.getFriendStatus().entrySet()) {
                 jdbcTemplate.update(insertFriends, user.getId(), entry.getKey(), entry.getValue());
             }
@@ -125,16 +129,60 @@ public class UserDBStorage implements UserStorage {
                     userRows.getDate("birthday").toLocalDate()
             );
             user.setId(userRows.getInt("user_id"));
-
-            if (user.getFriendStatus() != null) {
-                String insertFriends = "INSERT INTO friends(user_id, friends_id, status) values (?, ?, ?)";
+            SqlRowSet friendsRows = jdbcTemplate
+                    .queryForRowSet("SELECT friends_id, status FROM friends WHERE user_id = ?", userId);
+            HashMap<Integer, String> userFriends = new HashMap<>();
+            while (friendsRows.next()) {
+                int userFriendsId = friendsRows.getInt("friends_id");
+                String friendStatus = friendsRows.getString("status");
+                userFriends.put(userFriendsId, friendStatus);
+            }
+            user.setFriendStatus(userFriends);
+                /*String insertFriends = "INSERT INTO friends(user_id, friends_id, status) values (?, ?, ?)";
                 for (Map.Entry<Integer, String> entry : user.getFriendStatus().entrySet()) {
                     jdbcTemplate.update(insertFriends, user.getId(), entry.getKey(), entry.getValue());
-                }
-            }
+                }*/
             Optional<User> foundUser = Optional.of(user);
             return foundUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    public HashMap<Integer, String> addFriend(int userId, int friendId) {
+        checkUser(userId);
+        checkUser(friendId);
+        String insertFriend = "INSERT INTO friends(user_id, friends_id, status) VALUES (?, ?, ?)";
+        jdbcTemplate.update(insertFriend, userId, friendId, "isFriend");
+
+        SqlRowSet friendsRows = jdbcTemplate
+                .queryForRowSet("SELECT friends_id, status FROM friends WHERE user_id = ?", userId);
+        HashMap<Integer, String> userFriends = new HashMap<>();
+        while (friendsRows.next()) {
+            int userFriendsId = friendsRows.getInt("friends_id");
+            String friendStatus = friendsRows.getString("status");
+            userFriends.put(userFriendsId, friendStatus);
+        }
+        if (getUserById(userId).getFriendStatus() == null) {
+            getUserById(userId).setFriendStatus(new HashMap<>());
+        }
+        return userFriends;
+    }
+
+    @Override
+    public HashMap<Integer, String> deleteFriend(int userId, int friendId) {
+        checkUser(userId);
+        checkUser(friendId);
+        String deleteFriend = "DELETE FROM friends WHERE user_id = ? AND friends_id = ?";
+        jdbcTemplate.update(deleteFriend, userId, friendId);
+
+        SqlRowSet friendsRows = jdbcTemplate
+                .queryForRowSet("SELECT friends_id, status FROM friends WHERE user_id = ?", userId);
+        HashMap<Integer, String> userFriends = new HashMap<>();
+        while (friendsRows.next()) {
+            int userFriendsId = friendsRows.getInt("friends_id");
+            String friendStatus = friendsRows.getString("status");
+            userFriends.put(userFriendsId, friendStatus);
+        }
+        return userFriends;
     }
 }

@@ -31,7 +31,7 @@ public class Film {
     private Set<Integer> likes = new HashSet<>();
     private ArrayList<Map<String, Object>> genres = new ArrayList<>();
     private Set<Integer> genreIds = new HashSet<>();
-    private Map<String, Object> mpa = new HashMap<>(); // А вот если бы в тз сразу было сказано, то все было бы лучше
+    private Map<String, Object> mpa = new HashMap<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
