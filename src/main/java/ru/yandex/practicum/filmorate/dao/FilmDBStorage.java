@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.*;
@@ -101,6 +100,9 @@ public class FilmDBStorage implements FilmStorage {
             int id = film.getId();
             film.setMpa(selectMpa().get(id));
             film.setGenres(selectGenres().get(id));
+            if (film.getGenres() == null) {
+                film.setGenres(new HashSet<Film.GenreWrap>());
+            }
             film.setLikes(selectLikes(id));
             filmsWithStats.add(film);
         }
@@ -122,6 +124,9 @@ public class FilmDBStorage implements FilmStorage {
             int id = film.getId();
             film.setMpa(selectMpa().get(id));
             film.setGenres(selectGenres().get(id));
+            if (film.getGenres() == null) {
+                film.setGenres(new HashSet<Film.GenreWrap>());
+            }
             film.setLikes(selectLikes(id));
 
             Optional<Film> foundFilm = Optional.of(film);
@@ -220,6 +225,9 @@ public class FilmDBStorage implements FilmStorage {
             String insertGenresSql = "INSERT INTO film_genres(film_id, genre_id) VALUES (?, ?)";
             jdbcTemplate.update(insertGenresSql, film.getId(), genre.getId());
         }
+        if (selectGenres().get(film.getId()) != null) {
+            film.setGenres(selectGenres().get(film.getId()));
+        }
     }
 
     private void insertLikes(Film film) {
@@ -237,10 +245,10 @@ public class FilmDBStorage implements FilmStorage {
 
     private HashMap<Integer, Film.MpaWrap> selectMpa() {
 
-        SqlRowSet  mpaRows = jdbcTemplate.queryForRowSet(
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT MPA_ids.film_id, motion_picture_association.mpa_id, motion_picture_association.mpa_name " +
-                "FROM MPA_ids " +
-                "LEFT OUTER JOIN motion_picture_association ON MPA_ids.mpa_id = motion_picture_association.mpa_id");
+                        "FROM MPA_ids " +
+                        "LEFT OUTER JOIN motion_picture_association ON MPA_ids.mpa_id = motion_picture_association.mpa_id");
 
         HashMap<Integer, Film.MpaWrap> filmsMpa = new HashMap<>();
         while (mpaRows.next()) {
@@ -261,11 +269,15 @@ public class FilmDBStorage implements FilmStorage {
                         " ON film_genres.genre_id = genres.genre_id");
 
         HashMap<Integer, Set<Film.GenreWrap>> filmsGenres = new HashMap<>();
-
         while (genreRows.next()) {
+            int filmId = genreRows.getInt("film_id");
             Film.GenreWrap genreWrap = new Film.GenreWrap();
             genreWrap.setId(genreRows.getInt("genre_id"));
             genreWrap.setName(genreRows.getString("genre_name"));
+            if (!filmsGenres.containsKey(filmId)) {
+                filmsGenres.put(filmId, new TreeSet<>(Comparator.comparingInt(Film.GenreWrap::getId)));
+            }
+            filmsGenres.get(filmId).add(genreWrap);
         }
         return filmsGenres;
     }
