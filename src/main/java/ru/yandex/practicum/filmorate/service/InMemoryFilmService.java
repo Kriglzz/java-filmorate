@@ -64,9 +64,10 @@ public class InMemoryFilmService implements FilmService {
         film.setLikes(likes);
         if (film.getLikes()
                 .stream()
-                .anyMatch(id -> id == userId) && userId > 0) {
+                .anyMatch(id -> id == userId) && userId > 0 || film.getLikes().isEmpty()) {
             filmDBStorage.deleteLike(userId, filmId);
             log.info("Пользователь {} удалил лайк у фильма {}.", userId, filmId);
+            filmDBStorage.updateFilm(film);
         } else {
             log.info("Пользователь {} не смог удалить лайк у фильма {}.", userId, filmId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
