@@ -3,64 +3,69 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserDBStorage;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 public class InMemoryUserService implements UserService {
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserDBStorage userDBStorage;
 
     @Override
     public User createUser(User user) {
-        return inMemoryUserStorage.createUser(user);
+        return userDBStorage.createUser(user);
     }
 
     @Override
     public User updateUser(User user) {
         log.info("Пользователь {} обновлен.", user);
-        return inMemoryUserStorage.updateUser(user);
+        return userDBStorage.updateUser(user);
     }
 
     @Override
     public User getUserById(int userId) {
-        return inMemoryUserStorage.getUserById(userId);
+        return userDBStorage.getUserById(userId);
     }
 
     @Override
     public ArrayList<User> getAllUsers() {
-        return inMemoryUserStorage.getAllUsers();
+        return userDBStorage.getAllUsers();
     }
 
     @Override
     public void addFriend(int userId, int friendId) {
-        log.info("Пользователь {} добавил {} в список друзей.", userId, friendId);
-        User user1 = inMemoryUserStorage.getUserById(userId);
-        User user2 = inMemoryUserStorage.getUserById(friendId);
-        user1.addFriend(friendId);
-        user2.addFriend(userId);
+        log.info("Пользователь {} пытается добавить {} в список друзей.", userId, friendId);
+        User user = userDBStorage.getUserById(userId);
+        if (user.getFriendStatus() == null) {
+            user.setFriendStatus(new HashMap<>());
+        }
+        user.setFriendStatus(userDBStorage.addFriend(userId, friendId));
+        userDBStorage.updateUser(user);
     }
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-        log.info("Пользователь {} удалил {} из списка друзей.", userId, friendId);
-        User user1 = inMemoryUserStorage.getUserById(userId);
-        User user2 = inMemoryUserStorage.getUserById(friendId);
-        user1.deleteFriend(friendId);
-        user2.deleteFriend(userId);
+        log.info("Пользователь {} удаляет {} из списка друзей.", userId, friendId);
+        User user = userDBStorage.getUserById(userId);
+        user.getFriendStatus().remove(friendId);
+        if (user.getFriendStatus() != null
+                && user.getFriendStatus().containsKey(userId)) {
+            user.setFriendStatus(userDBStorage.deleteFriend(userId, friendId));
+        }
+        userDBStorage.updateUser(user);
     }
 
     @Override
     public ArrayList<User> getFriends(int userId) {
-        User user = inMemoryUserStorage.getUserById(userId);
+        User user = userDBStorage.getUserById(userId);
         ArrayList<User> friends = new ArrayList<>();
-        for (int element : user.getFriends()) {
-            User listUser = inMemoryUserStorage.getUserById(element);
+        for (int element : user.getFriendStatus().keySet()) {
+            User listUser = userDBStorage.getUserById(element);
             friends.add(listUser);
         }
         return friends;
@@ -68,14 +73,15 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public ArrayList<User> getMutualFriends(int firstUserId, int secondUserId) {
-        User user1 = inMemoryUserStorage.getUserById(firstUserId);
-        User user2 = inMemoryUserStorage.getUserById(secondUserId);
-        Set<Integer> commonElements = new HashSet<>(user1.getFriends());
-        commonElements.retainAll(user2.getFriends());
+        Map<Integer, String> firstUserFriends = getUserById(firstUserId).getFriendStatus();
+        Map<Integer, String> secondUserFriends = getUserById(secondUserId).getFriendStatus();
+
         ArrayList<User> mutualFriends = new ArrayList<>();
-        for (int element : commonElements) {
-            User user = inMemoryUserStorage.getUserById(element);
-            mutualFriends.add(user);
+
+        for (Integer key : firstUserFriends.keySet()) {
+            if (secondUserFriends.containsKey(key)) {
+                mutualFriends.add(getUserById(key));
+            }
         }
         return mutualFriends;
     }

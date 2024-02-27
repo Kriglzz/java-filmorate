@@ -8,8 +8,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Validated
 @lombok.Data
@@ -30,7 +30,7 @@ public class User {
     private String name;
     @lombok.NonNull
     private int id;
-    private Set<Integer> friends = new HashSet<>();
+    private Map<Integer, String> friendStatus = new HashMap<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
@@ -48,17 +48,5 @@ public class User {
         } else {
             return true;
         }
-    }
-
-    public Integer generateId() {
-        return ++userCount;
-    }
-
-    public void addFriend(int friendId) {
-        friends.add(friendId);
-    }
-
-    public void deleteFriend(int friendId) {
-        friends.remove(friendId);
     }
 }

@@ -4,20 +4,29 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface FilmService {
-    public Film addFilm(Film film);
+    Film addFilm(Film film);
 
-    public Film updateFilm(Film film);
+    Film updateFilm(Film film);
 
-    public Film getFilmById(int filmId);
+    Film getFilmById(int filmId);
 
-    public ArrayList<Film> getAllFilms();
+    ArrayList<Film> getAllFilms();
 
-    public void giveLike(int userId, int filmId);
+    void giveLike(int userId, int filmId);
 
-    public void deleteLike(int userId, int filmId);
+    void deleteLike(int userId, int filmId);
 
-    public List<Film> getMostLikedFilms(Integer count);
+    List<Film> getMostLikedFilms(Integer count);
+
+    List<Map<String, Object>> getMpa();
+
+    Map<String, Object> getMpaById(int mpaId);
+
+    List<Map<String, Object>> getGenres();
+
+    Map<String, Object> getGenreById(int genreId);
 
 }
