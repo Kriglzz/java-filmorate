@@ -102,7 +102,7 @@ public class FilmDBStorage implements FilmStorage {
             film.setGenres(selectGenres().get(id));
             if (film.getGenres() == null) {
                 film.setGenres(new HashSet<Film.GenreWrap>());
-            }
+            } // Ииии тааак сойдеееет
             film.setLikes(selectLikes(id));
             filmsWithStats.add(film);
         }
@@ -216,8 +216,10 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private void insertMpa(Film film) {
-        String insertMpaSql = "INSERT INTO MPA_ids(film_id, mpa_id) VALUES (?, ?)";
-        jdbcTemplate.update(insertMpaSql, film.getId(), film.getMpa().getId());
+        if (film.getMpa() != null) {
+            String insertMpaSql = "INSERT INTO MPA_ids(film_id, mpa_id) VALUES (?, ?)";
+            jdbcTemplate.update(insertMpaSql, film.getId(), film.getMpa().getId());
+        }
     }
 
     private void insertGenre(Film film) {
@@ -248,7 +250,8 @@ public class FilmDBStorage implements FilmStorage {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT MPA_ids.film_id, motion_picture_association.mpa_id, motion_picture_association.mpa_name " +
                         "FROM MPA_ids " +
-                        "LEFT OUTER JOIN motion_picture_association ON MPA_ids.mpa_id = motion_picture_association.mpa_id");
+                        "LEFT OUTER JOIN motion_picture_association " +
+                        "ON MPA_ids.mpa_id = motion_picture_association.mpa_id");
 
         HashMap<Integer, Film.MpaWrap> filmsMpa = new HashMap<>();
         while (mpaRows.next()) {

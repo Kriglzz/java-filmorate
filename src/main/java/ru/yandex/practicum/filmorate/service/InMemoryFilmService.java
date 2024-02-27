@@ -75,12 +75,21 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public List<Film> getMostLikedFilms(Integer count) {
-        log.info("Вывод топ {} популярных фильмов .", count);
+        log.info("Вывод топ {} популярных фильмов.", count);
+
         ArrayList<Film> films = filmDBStorage.getAllFilms();
-        films.sort(Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed());
+
+        films.sort((film1, film2) -> {
+            if (film1.getLikes().contains(0)) {
+                return film2.getLikes().contains(0) ? Integer.compare(film2.getLikes().size(), film1.getLikes().size()) : 1;
+            } else if (film2.getLikes().contains(0)) {
+                return -1;
+            } else {
+                return Integer.compare(film2.getLikes().size(), film1.getLikes().size());
+            }
+        });
+        //я хочу плакац(((
         return films.subList(0, Math.min(films.size(), count));
-
-
     }
 
     @Override

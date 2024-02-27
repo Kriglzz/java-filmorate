@@ -24,11 +24,11 @@ public class InMemoryFilmServiceTest {
                 "Give me back my 2007",
                 LocalDate.of(2007, 7, 7),
                 100);
-        HashSet <Integer>like = new HashSet<>();
+        HashSet<Integer> like = new HashSet<>();
         like.clear();
         FilmDBStorage filmDBStorage = new FilmDBStorage(jdbcTemplate);
         filmDBStorage.addFilm(film);
-        Film savedFilm = filmDBStorage.getFilmById(film.getId());
+        Film savedFilm = filmDBStorage.getFilmById(1);
         savedFilm.setLikes(like);
         assertThat(savedFilm)
                 .isNotNull()
