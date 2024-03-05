@@ -29,4 +29,5 @@ public interface FilmService {
 
     Map<String, Object> getGenreById(int genreId);
 
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
 }

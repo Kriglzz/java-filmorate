@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -240,8 +241,6 @@ public class FilmDBStorage implements FilmStorage {
                     jdbcTemplate.update(insertLikesSql, film.getId(), userWhoLikeId);
                 }
             }
-        } else {
-            jdbcTemplate.update(insertLikesSql, film.getId(), null);
         }
     }
 
@@ -296,6 +295,26 @@ public class FilmDBStorage implements FilmStorage {
             filmLikes.add(userId);
         }
         return filmLikes;
+    }
+
+    /**
+     * Получить список общих фильмов
+     */
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                    "FROM likes as u " +
+                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                    "ON u.film_id = f.film_id " +
+                    "WHERE user_id = ? ;", friendId, userId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (commonFilmsRows.next()) {
+            int filmId = commonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
     }
 
 }
