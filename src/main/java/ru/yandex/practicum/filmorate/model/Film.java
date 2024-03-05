@@ -36,6 +36,7 @@ public class Film {
     private MpaWrap mpa;
     @JsonProperty("genres")
     private Set<GenreWrap> genres = new HashSet<>();
+    private DirectorWrap director;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
@@ -56,4 +57,9 @@ public class Film {
         private String name;
     }
 
+    @Data
+    public static class DirectorWrap {
+        private int id;
+        private String name;
+    }
 }

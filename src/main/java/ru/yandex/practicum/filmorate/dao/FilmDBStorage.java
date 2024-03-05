@@ -316,5 +316,8 @@ public class FilmDBStorage implements FilmStorage {
                 .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
                 .collect(Collectors.toList());
     }
-
+    
+    public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
+        return null; //TODO:3.Реализовать этот метод
+    }
 }
