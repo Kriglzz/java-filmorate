@@ -296,4 +296,22 @@ public class FilmDBStorage implements FilmStorage {
         return filmLikes;
     }
 
+    /**
+     * Получить список общих фильмов
+     */
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                    "FROM likes as u " +
+                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                    "ON u.film_id = f.film_id " +
+                    "WHERE user_id = ? ;", friendId, userId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (commonFilmsRows.next()) {
+            int filmId = commonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result;
+    }
+
 }

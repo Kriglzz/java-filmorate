@@ -138,4 +138,11 @@ public class InMemoryFilmService implements FilmService {
         }
     }
 
+    /**
+     * Получить список общих фильмов
+     */
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        log.info("Вывод общих фильмов для юзера с id {} и друга с id {}.", userId, friendId);
+        return filmDBStorage.getCommonFilms(userId, friendId);
+    }
 }
