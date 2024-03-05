@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -311,7 +312,9 @@ public class FilmDBStorage implements FilmStorage {
             int filmId = commonFilmsRows.getInt("film_id");
             result.add(getFilmById(filmId));
         }
-        return result;
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
     }
 
 }
