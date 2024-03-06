@@ -241,8 +241,6 @@ public class FilmDBStorage implements FilmStorage {
                     jdbcTemplate.update(insertLikesSql, film.getId(), userWhoLikeId);
                 }
             }
-        } else {
-            jdbcTemplate.update(insertLikesSql, film.getId(), null);
         }
     }
 
