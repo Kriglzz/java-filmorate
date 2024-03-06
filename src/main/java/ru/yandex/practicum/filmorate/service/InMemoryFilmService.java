@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -151,6 +152,11 @@ public class InMemoryFilmService implements FilmService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр не найден.");
         }
+    }
+
+    @Override
+    public void deleteFilm(int filmId) {
+        filmDBStorage.deleteFilm(filmId);
     }
 
 }

@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS film (
 CREATE TABLE IF NOT EXISTS MPA_ids (
     film_id integer,
     mpa_id integer,
-    FOREIGN KEY (film_id) REFERENCES film (film_id),
+    FOREIGN KEY (film_id) REFERENCES film (film_id) ON DELETE CASCADE,
     FOREIGN KEY (mpa_id) REFERENCES motion_picture_association (mpa_id)
 
 );
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS film_genres (
     film_id integer,
     genre_id integer,
     FOREIGN KEY (genre_id) REFERENCES genres (genre_id),
-    FOREIGN KEY (film_id) REFERENCES film (film_id)
+    FOREIGN KEY (film_id) REFERENCES film (film_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -71,5 +71,6 @@ CREATE TABLE IF NOT EXISTS friends (
     friends_id integer,
     status varchar,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (friends_id) REFERENCES users (user_id) ON DELETE CASCADE,
     UNIQUE (user_id, friends_id, status)
 );

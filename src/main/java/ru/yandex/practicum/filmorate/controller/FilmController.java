@@ -53,4 +53,9 @@ public class FilmController {
         return inMemoryFilmService.getMostLikedFilms(count);
     }
 
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable int filmId) {
+        inMemoryFilmService.deleteFilm(filmId);
+    }
+
 }

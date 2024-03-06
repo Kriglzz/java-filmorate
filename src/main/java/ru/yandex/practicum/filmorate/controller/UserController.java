@@ -56,4 +56,9 @@ public class UserController {
                                             @PathVariable int otherId) {
         return inMemoryUserService.getMutualFriends(userId, otherId);
     }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable Long userId) {
+        inMemoryUserService.deleteUser(userId);
+    }
 }

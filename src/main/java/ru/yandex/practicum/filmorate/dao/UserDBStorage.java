@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -8,6 +9,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.UnknownUpdateException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
@@ -184,5 +186,14 @@ public class UserDBStorage implements UserStorage {
             userFriends.put(userFriendsId, friendStatus);
         }
         return userFriends;
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        try {
+            jdbcTemplate.update("DELETE FROM users WHERE user_id = ?",userId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new UnknownUpdateException("Пользователя не существует");
+        }
     }
 }

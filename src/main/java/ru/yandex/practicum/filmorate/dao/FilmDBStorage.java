@@ -139,8 +139,7 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public void deleteFilm(int filmId) {
         checkFilm(filmId);
-        String sql = "DELETE FROM film WHERE film_id = ?";
-        jdbcTemplate.update(sql, filmId);
+        jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", filmId);
     }
 
     @Override
@@ -189,15 +188,12 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public Set<Integer> giveLike(int userId, int filmId) {
-
         Set<Integer> likes = new HashSet<>();
         likes.add(userId);
-
         Film film = getFilmById(filmId);
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
         }
-
         return likes;
     }
 
@@ -297,5 +293,4 @@ public class FilmDBStorage implements FilmStorage {
         }
         return filmLikes;
     }
-
 }
