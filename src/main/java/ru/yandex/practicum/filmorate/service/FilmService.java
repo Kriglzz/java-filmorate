@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
@@ -29,6 +28,8 @@ public interface FilmService {
     List<Map<String, Object>> getGenres();
 
     Map<String, Object> getGenreById(int genreId);
+
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
 
     void deleteFilm(int filmId);
 }

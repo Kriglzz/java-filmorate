@@ -4,12 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -45,9 +45,7 @@ public class InMemoryFilmService implements FilmService {
         Set<Integer> likes = film.getLikes();
         likes.add(userId);
         film.setLikes(likes);
-        if (film.getLikes()
-                .stream()
-                .anyMatch(id -> id == userId) && userId > 0) {
+        if (userId > 0 && film.getLikes().contains(userId)) {
             log.info("Пользователь {} поставил лайк фильму {}.", userId, filmId);
             filmDBStorage.updateFilm(film);
         } else {
@@ -60,15 +58,9 @@ public class InMemoryFilmService implements FilmService {
     public void deleteLike(int userId, int filmId) {
         log.info("Попытка пользователя {} удалить лайк у фильма {}.", userId, filmId);
         Film film = filmDBStorage.getFilmById(filmId);
-        Set<Integer> likes = film.getLikes();
-        likes.remove(userId);
-        film.setLikes(likes);
-        if (film.getLikes()
-                .stream()
-                .anyMatch(id -> id == userId) && userId > 0 || film.getLikes().isEmpty()) {
+        if (userId > 0 && film.getLikes().contains(userId)) {
             filmDBStorage.deleteLike(userId, filmId);
             log.info("Пользователь {} удалил лайк у фильма {}.", userId, filmId);
-            filmDBStorage.updateFilm(film);
         } else {
             log.info("Пользователь {} не смог удалить лайк у фильма {}.", userId, filmId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
@@ -81,17 +73,9 @@ public class InMemoryFilmService implements FilmService {
 
         ArrayList<Film> films = filmDBStorage.getAllFilms();
 
-        films.sort((film1, film2) -> {
-            if (film1.getLikes().contains(0)) {
-                return film2.getLikes().contains(0) ? Integer.compare(film2.getLikes().size(), film1.getLikes().size()) : 1;
-            } else if (film2.getLikes().contains(0)) {
-                return -1;
-            } else {
-                return Integer.compare(film2.getLikes().size(), film1.getLikes().size());
-            }
-        });
-        //я хочу плакац(((
-        return films.subList(0, Math.min(films.size(), count));
+        return films.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .limit(count).collect(Collectors.toList());
     }
 
     @Override
@@ -152,6 +136,14 @@ public class InMemoryFilmService implements FilmService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр не найден.");
         }
+    }
+
+    /**
+     * Получить список общих фильмов
+     */
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        log.info("Вывод общих фильмов для юзера с id {} и друга с id {}.", userId, friendId);
+        return filmDBStorage.getCommonFilms(userId, friendId);
     }
 
     @Override

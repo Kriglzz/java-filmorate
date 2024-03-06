@@ -53,6 +53,17 @@ public class FilmController {
         return inMemoryFilmService.getMostLikedFilms(count);
     }
 
+    /**
+     * Получить список общих фильмов
+     */
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(
+            @RequestParam(value = "userId", required = true) Integer userId,
+            @RequestParam(value = "friendId", required = true) Integer friendId
+    ) {
+        return inMemoryFilmService.getCommonFilms(userId, friendId);
+    }
+
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable int filmId) {
         inMemoryFilmService.deleteFilm(filmId);

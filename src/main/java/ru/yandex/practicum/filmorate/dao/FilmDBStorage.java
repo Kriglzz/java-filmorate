@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -139,7 +140,8 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public void deleteFilm(int filmId) {
         checkFilm(filmId);
-        jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", filmId);
+        String sql = "DELETE FROM film WHERE film_id = ?";
+        jdbcTemplate.update(sql, filmId);
     }
 
     @Override
@@ -188,12 +190,15 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public Set<Integer> giveLike(int userId, int filmId) {
+
         Set<Integer> likes = new HashSet<>();
         likes.add(userId);
+
         Film film = getFilmById(filmId);
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
         }
+
         return likes;
     }
 
@@ -293,4 +298,25 @@ public class FilmDBStorage implements FilmStorage {
         }
         return filmLikes;
     }
+
+    /**
+     * Получить список общих фильмов
+     */
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                    "FROM likes as u " +
+                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                    "ON u.film_id = f.film_id " +
+                    "WHERE user_id = ? ;", friendId, userId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (commonFilmsRows.next()) {
+            int filmId = commonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
+
 }
