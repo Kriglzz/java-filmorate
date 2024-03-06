@@ -145,4 +145,11 @@ public class InMemoryFilmService implements FilmService {
         log.info("Вывод общих фильмов для юзера с id {} и друга с id {}.", userId, friendId);
         return filmDBStorage.getCommonFilms(userId, friendId);
     }
+
+    @Override
+    public void deleteFilm(int filmId) {
+        log.info("Удаление фильма с id {}", filmId);
+        filmDBStorage.deleteFilm(filmId);
+    }
+
 }
