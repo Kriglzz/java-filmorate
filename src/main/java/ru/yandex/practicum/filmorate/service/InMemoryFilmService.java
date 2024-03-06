@@ -148,6 +148,7 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public void deleteFilm(int filmId) {
+        log.info("Удаление фильма с id {}", filmId);
         filmDBStorage.deleteFilm(filmId);
     }
 

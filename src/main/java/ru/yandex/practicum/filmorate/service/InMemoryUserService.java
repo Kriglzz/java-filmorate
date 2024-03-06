@@ -88,6 +88,7 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void deleteUser(Long userId) {
+        log.info("Удаление пользователя с id {}", userId);
         userDBStorage.deleteUser(userId);
     }
 
