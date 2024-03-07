@@ -47,6 +47,9 @@ public class FilmController {
         inMemoryFilmService.deleteLike(userId, filmId);
     }
 
+    /**
+     * Получить список популярных фильмов
+     */
     @GetMapping("/popular")
     public List<Film> getPopularFilms(
             @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
