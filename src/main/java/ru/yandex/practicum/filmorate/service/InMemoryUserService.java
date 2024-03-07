@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.dao.UserDBStorage;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -15,6 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class InMemoryUserService implements UserService {
     private final UserDBStorage userDBStorage;
+    private final FilmDBStorage filmDBStorage;
 
     @Override
     public User createUser(User user) {
@@ -90,6 +94,39 @@ public class InMemoryUserService implements UserService {
     public void deleteUser(Long userId) {
         log.info("Удаление пользователя с id {}", userId);
         userDBStorage.deleteUser(userId);
+    }
+
+    @Override
+    public ArrayList<Film> getRecommendations(int userId) {
+        List<Film> films = new ArrayList<>();
+        ArrayList<Film> recommendations = new ArrayList<>();
+        for (Film film : filmDBStorage.getAllFilms()) {
+            if (film.getLikes().contains(userId)) {
+                films.add(film);
+            }
+        }
+        for (Map.Entry<Integer, Integer> entry : findSimilarity(films, userId)) {
+            recommendations.addAll(filmDBStorage.getUnCommonFilms(userId, entry.getKey()));
+        }
+        return recommendations;
+    }
+
+    private List<Map.Entry<Integer, Integer>> findSimilarity(List<Film> films, int userId) {
+        Map<Integer, Integer> similarityMatrix = new HashMap<>();
+
+        // Заполняем матрицу схожести
+        for (Film film : films) {
+            for (Integer userWhoLiked : film.getLikes()) {
+                if (!(userWhoLiked == userId)) {
+                    similarityMatrix.putIfAbsent(userWhoLiked, 0);
+                    similarityMatrix.merge(userWhoLiked, 1, Integer::sum);
+                }
+            }
+        }
+        //сортируем матрицу по value
+        List<Map.Entry<Integer, Integer>> list = new ArrayList<>(similarityMatrix.entrySet());
+        list.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+        return list;
     }
 
 }
