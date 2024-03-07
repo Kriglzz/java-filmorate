@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.InMemoryUserService;
 
@@ -60,5 +61,10 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
         inMemoryUserService.deleteUser(userId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public ArrayList<Film> getRecommendations(@PathVariable int userId) {
+        return inMemoryUserService.getRecommendations(userId);
     }
 }
