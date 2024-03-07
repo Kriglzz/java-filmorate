@@ -303,10 +303,10 @@ public class FilmDBStorage implements FilmStorage {
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
                 "SELECT u.film_id " +
-                    "FROM likes as u " +
-                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
-                    "ON u.film_id = f.film_id " +
-                    "WHERE user_id = ? ;", friendId, userId);
+                        "FROM likes as u " +
+                        "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE user_id = ? ;", friendId, userId);
         ArrayList<Film> result = new ArrayList<>();
         while (commonFilmsRows.next()) {
             int filmId = commonFilmsRows.getInt("film_id");
@@ -317,4 +317,21 @@ public class FilmDBStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Film> getUnCommonFilms(Integer userId, Integer anotherUserId) {
+        SqlRowSet uncommonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                        "FROM likes as u " +
+                        "LEFT JOIN (SELECT film_id FROM likes WHERE user_id = ?) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE f.film_id IS NULL AND u.user_id = ?;", userId, anotherUserId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (uncommonFilmsRows.next()) {
+            int filmId = uncommonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
 }
