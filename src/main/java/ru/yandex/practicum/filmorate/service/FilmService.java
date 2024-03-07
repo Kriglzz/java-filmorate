@@ -19,7 +19,7 @@ public interface FilmService {
 
     void deleteLike(int userId, int filmId);
 
-    List<Film> getMostLikedFilms(Integer count);
+    List<Film> getMostLikedFilms(Integer count, Integer genreId, Integer year);
 
     List<Map<String, Object>> getMpa();
 

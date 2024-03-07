@@ -68,13 +68,29 @@ public class InMemoryFilmService implements FilmService {
     }
 
     @Override
-    public List<Film> getMostLikedFilms(Integer count) {
+    public List<Film> getMostLikedFilms(Integer count, Integer genreId, Integer year) {
         log.info("Вывод топ {} популярных фильмов.", count);
 
-        ArrayList<Film> films = filmDBStorage.getAllFilms();
-
-        return films.stream()
+        List<Film> filteredFilmList = filmDBStorage.getAllFilms();
+        List<Film> popularFilmList = filteredFilmList.stream()
                 .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .limit(count).collect(Collectors.toList());
+        if (year != null) {
+            log.info("Отсортируем по году выпуска {}", year);
+            filteredFilmList = filteredFilmList.stream()
+                    .filter(film -> film.getReleaseDate().getYear() == year).collect(Collectors.toList());
+        }
+        if (genreId != null) {
+            log.info("Отсортируем по жанру с id {}", genreId);
+            String genreName = filmDBStorage.getGenres().get(genreId);
+            filteredFilmList = filteredFilmList.stream()
+                    .filter(film -> film.getGenres().contains(new Film.GenreWrap(genreId, genreName)))
+                    .collect(Collectors.toList());
+        }
+        if (year != null || genreId != null) {
+            popularFilmList.retainAll(filteredFilmList);
+        }
+        return popularFilmList.stream()
                 .limit(count).collect(Collectors.toList());
     }
 
