@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -9,12 +10,12 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+import static ru.yandex.practicum.filmorate.dao.DirectorDBStorage.directorRowMapper;
 
 @Slf4j
 @Component
@@ -44,6 +45,7 @@ public class FilmDBStorage implements FilmStorage {
         insertMpa(film);
         insertGenre(film);
         insertLikes(film);
+        insertDirector(film);
 
         Optional<Film> addedFilm = Optional.of(film);
         return addedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -79,6 +81,11 @@ public class FilmDBStorage implements FilmStorage {
         String deleteLikesSql = "DELETE FROM likes WHERE film_id=?";
         jdbcTemplate.update(deleteLikesSql, film.getId());
         insertLikes(film);
+
+        String deleteDirectorsSql = "DELETE FROM films_directors WHERE film_id=?";
+        jdbcTemplate.update(deleteDirectorsSql, film.getId());
+        insertDirector(film);
+
         Optional<Film> updatedFilm = Optional.of(film);
         return updatedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -105,6 +112,7 @@ public class FilmDBStorage implements FilmStorage {
                 film.setGenres(new HashSet<Film.GenreWrap>());
             } // Ииии тааак сойдеееет
             film.setLikes(selectLikes(id));
+            film.setDirectors(selectDirectors(id));
             filmsWithStats.add(film);
         }
 
@@ -129,6 +137,7 @@ public class FilmDBStorage implements FilmStorage {
                 film.setGenres(new HashSet<Film.GenreWrap>());
             }
             film.setLikes(selectLikes(id));
+            film.setDirectors(selectDirectors(id));
 
             Optional<Film> foundFilm = Optional.of(film);
             return foundFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден"));
@@ -244,8 +253,19 @@ public class FilmDBStorage implements FilmStorage {
         }
     }
 
-    private HashMap<Integer, Film.MpaWrap> selectMpa() {
+    private void insertDirector(Film film) {
+        String sql = "INSERT INTO films_directors(film_id, director_id) " +
+                     "VALUES (?, ?)";
+        if (!film.getDirectors().isEmpty()) {
+            for (Film.DirectorWrap director : film.getDirectors()) {
+                if (director.getId() > 0) {
+                    jdbcTemplate.update(sql, film.getId(), director.getId());
+                }
+            }
+        }
+    }
 
+    private HashMap<Integer, Film.MpaWrap> selectMpa() {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT MPA_ids.film_id, motion_picture_association.mpa_id, motion_picture_association.mpa_name " +
                         "FROM MPA_ids " +
@@ -264,7 +284,6 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private HashMap<Integer, Set<Film.GenreWrap>> selectGenres() {
-
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM film_genres" +
                         " LEFT OUTER JOIN genres" +
@@ -297,6 +316,13 @@ public class FilmDBStorage implements FilmStorage {
         return filmLikes;
     }
 
+    private List<Film.DirectorWrap> selectDirectors(int filmId) {
+        String sql = "SELECT d.* FROM directors d " +
+                "LEFT JOIN films_directors fd ON fd.director_id = d.director_id " +
+                "WHERE fd.film_id=?";
+        return jdbcTemplate.query(sql, directorRowMapper(), filmId);
+    }
+
     /**
      * Получить список общих фильмов
      */
@@ -318,6 +344,32 @@ public class FilmDBStorage implements FilmStorage {
     }
     
     public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
-        return null; //TODO:3.Реализовать этот метод
+        try {
+            jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?;", directorRowMapper(), directorId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        List<Film> films = getAllFilms();
+        films = films.stream()
+                .peek(film -> film.setDirectors(film.getDirectors().stream()
+                        .filter(director -> director.getId() == directorId)
+                        .collect(Collectors.toList())))
+                .filter(film -> !film.getDirectors().isEmpty())
+                .collect(Collectors.toList());
+        switch (sortBy) {
+            case "likes":
+                films = films.stream()
+                        .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                        .collect(Collectors.toList());
+                break;
+            case "year":
+                films = films.stream()
+                        .sorted(Comparator.comparing(Film::getReleaseDate))
+                        .collect(Collectors.toList());
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        return films;
     }
 }
