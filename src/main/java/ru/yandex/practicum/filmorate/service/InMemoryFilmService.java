@@ -152,8 +152,8 @@ public class InMemoryFilmService implements FilmService {
         filmDBStorage.deleteFilm(filmId);
     }
 
-    
     public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
-        return null;
+        log.info("Получение фильмов режиссера {} с сортировкой по {}", directorId, sortBy);
+        return filmDBStorage.getDirectorFilmsSortedBy(directorId, sortBy);
     }
 }
