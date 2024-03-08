@@ -342,7 +342,7 @@ public class FilmDBStorage implements FilmStorage {
                 .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
                 .collect(Collectors.toList());
     }
-    
+
     public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
         try {
             jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?;", directorRowMapper(), directorId);
