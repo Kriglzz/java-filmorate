@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,4 +31,6 @@ public interface FilmStorage {
     Set<Integer> giveLike(int userId, int filmId);
 
     Set<Integer> deleteLike(int userId, int filmId);
+
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
 }

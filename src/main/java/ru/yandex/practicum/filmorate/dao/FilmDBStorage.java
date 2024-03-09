@@ -202,18 +202,39 @@ public class FilmDBStorage implements FilmStorage {
         return likes;
     }
 
+    @Override
     public Set<Integer> deleteLike(int userId, int filmId) {
         String deleteLike = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
         jdbcTemplate.update(deleteLike, userId, filmId);
 
         SqlRowSet likesRows = jdbcTemplate.queryForRowSet("SELECT user_id FROM likes WHERE film_id = ?", filmId);
         Set<Integer> likes = new HashSet<>();
-
-        Film film = getFilmById(filmId);
-        if (film.getLikes() == null) {
-            film.setLikes(new HashSet<>());
+        while (likesRows.next()) {
+            int likedUserId = likesRows.getInt("user_id");
+            likes.add(likedUserId);
         }
         return likes;
+    }
+
+    /**
+     * Получить список общих фильмов
+     */
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                        "FROM likes as u " +
+                        "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE user_id = ? ;", friendId, userId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (commonFilmsRows.next()) {
+            int filmId = commonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
     }
 
     private void insertMpa(Film film) {
@@ -295,26 +316,6 @@ public class FilmDBStorage implements FilmStorage {
             filmLikes.add(userId);
         }
         return filmLikes;
-    }
-
-    /**
-     * Получить список общих фильмов
-     */
-    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
-                "SELECT u.film_id " +
-                    "FROM likes as u " +
-                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
-                    "ON u.film_id = f.film_id " +
-                    "WHERE user_id = ? ;", friendId, userId);
-        ArrayList<Film> result = new ArrayList<>();
-        while (commonFilmsRows.next()) {
-            int filmId = commonFilmsRows.getInt("film_id");
-            result.add(getFilmById(filmId));
-        }
-        return result.stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .collect(Collectors.toList());
     }
 
 }
