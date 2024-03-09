@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class InMemoryFilmService implements FilmService {
+public class FilmDBService implements FilmService {
     private final FilmDBStorage filmDBStorage;
 
     @Override
@@ -141,6 +141,7 @@ public class InMemoryFilmService implements FilmService {
     /**
      * Получить список общих фильмов
      */
+    @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         log.info("Вывод общих фильмов для юзера с id {} и друга с id {}.", userId, friendId);
         return filmDBStorage.getCommonFilms(userId, friendId);

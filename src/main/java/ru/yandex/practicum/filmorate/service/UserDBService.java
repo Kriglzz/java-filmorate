@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class InMemoryUserService implements UserService {
+public class UserDBService implements UserService {
     private final UserDBStorage userDBStorage;
 
     @Override

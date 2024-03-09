@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.InMemoryUserService;
+import ru.yandex.practicum.filmorate.service.UserDBService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -12,53 +12,53 @@ import java.util.ArrayList;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final InMemoryUserService inMemoryUserService;
+    private final UserDBService userDBService;
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        return inMemoryUserService.createUser(user);
+        return userDBService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return inMemoryUserService.updateUser(user);
+        return userDBService.updateUser(user);
     }
 
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable int userId) {
-        return inMemoryUserService.getUserById(userId);
+        return userDBService.getUserById(userId);
     }
 
     @GetMapping
     public ArrayList<User> getAllUsers() {
-        return inMemoryUserService.getAllUsers();
+        return userDBService.getAllUsers();
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable int userId,
                           @PathVariable int friendId) {
-        inMemoryUserService.addFriend(userId, friendId);
+        userDBService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable int userId,
                              @PathVariable int friendId) {
-        inMemoryUserService.deleteFriend(userId, friendId);
+        userDBService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{userId}/friends")
     public ArrayList<User> getFriends(@PathVariable int userId) {
-        return inMemoryUserService.getFriends(userId);
+        return userDBService.getFriends(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
     public ArrayList<User> getMutualFriends(@PathVariable int userId,
                                             @PathVariable int otherId) {
-        return inMemoryUserService.getMutualFriends(userId, otherId);
+        return userDBService.getMutualFriends(userId, otherId);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
-        inMemoryUserService.deleteUser(userId);
+        userDBService.deleteUser(userId);
     }
 }
