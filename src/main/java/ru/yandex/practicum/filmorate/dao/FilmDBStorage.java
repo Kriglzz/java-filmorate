@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -317,7 +316,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private List<Film.DirectorWrap> selectDirectors(int filmId) {
-        String sql = "SELECT d.* FROM directors d " +
+        String sql = "SELECT d.director_id, d.director_name FROM directors d " +
                 "LEFT JOIN films_directors fd ON fd.director_id = d.director_id " +
                 "WHERE fd.film_id=?";
         return jdbcTemplate.query(sql, directorRowMapper(), filmId);
@@ -344,18 +343,21 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
-        try {
-            jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?;", directorRowMapper(), directorId);
-        } catch (EmptyResultDataAccessException e) {
+        List<Integer> filmsIds;
+        filmsIds = jdbcTemplate.query(
+                "SELECT film_id FROM films_directors WHERE director_id = ?;",
+                (rs, rowNum) -> rs.getInt("film_id"),
+                directorId
+        );
+        if (filmsIds.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        List<Film> films = getAllFilms();
-        films = films.stream()
-                .peek(film -> film.setDirectors(film.getDirectors().stream()
-                        .filter(director -> director.getId() == directorId)
-                        .collect(Collectors.toList())))
-                .filter(film -> !film.getDirectors().isEmpty())
-                .collect(Collectors.toList());
+
+        List<Film> films = new ArrayList<>();
+        for (int id: filmsIds) {
+            films.add(getFilmById(id));
+        }
+
         switch (sortBy) {
             case "likes":
                 films = films.stream()
