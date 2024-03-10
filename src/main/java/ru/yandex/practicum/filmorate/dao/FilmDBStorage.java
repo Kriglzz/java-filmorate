@@ -9,11 +9,13 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
+
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import static ru.yandex.practicum.filmorate.dao.DirectorDBStorage.directorRowMapper;
 
 @Slf4j
@@ -254,7 +256,7 @@ public class FilmDBStorage implements FilmStorage {
 
     private void insertDirector(Film film) {
         String sql = "INSERT INTO films_directors(film_id, director_id) " +
-                     "VALUES (?, ?)";
+                "VALUES (?, ?)";
         if (!film.getDirectors().isEmpty()) {
             for (Film.DirectorWrap director : film.getDirectors()) {
                 if (director.getId() > 0) {
@@ -328,10 +330,10 @@ public class FilmDBStorage implements FilmStorage {
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
                 "SELECT u.film_id " +
-                    "FROM likes as u " +
-                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
-                    "ON u.film_id = f.film_id " +
-                    "WHERE user_id = ? ;", friendId, userId);
+                        "FROM likes as u " +
+                        "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE user_id = ? ;", friendId, userId);
         ArrayList<Film> result = new ArrayList<>();
         while (commonFilmsRows.next()) {
             int filmId = commonFilmsRows.getInt("film_id");
@@ -354,7 +356,7 @@ public class FilmDBStorage implements FilmStorage {
         }
 
         List<Film> films = new ArrayList<>();
-        for (int id: filmsIds) {
+        for (int id : filmsIds) {
             films.add(getFilmById(id));
         }
 
@@ -373,5 +375,23 @@ public class FilmDBStorage implements FilmStorage {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         return films;
+    }
+
+    @Override
+    public List<Film> getUnCommonFilms(Integer userId, Integer anotherUserId) {
+        SqlRowSet uncommonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                        "FROM likes as u " +
+                        "LEFT JOIN (SELECT film_id FROM likes WHERE user_id = ?) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE f.film_id IS NULL AND u.user_id = ?;", userId, anotherUserId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (uncommonFilmsRows.next()) {
+            int filmId = uncommonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
     }
 }
