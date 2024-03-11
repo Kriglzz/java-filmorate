@@ -94,6 +94,17 @@ public class InMemoryFilmService implements FilmService {
                 .limit(count).collect(Collectors.toList());
     }
 
+    public List<Film> getFilmsByQuery(String query, String by) {
+        log.info("Выполним поиск фильма");
+        if (query.isBlank()) {
+            log.info("Пришел пустой запрос");
+            return new ArrayList<>();
+        }
+        log.info("Запрос: {}", query);
+        String subString = "%" + query.toLowerCase() + "%";
+        return filmDBStorage.getFilmsByQuery(subString, by);
+    }
+
     @Override
     public List<Map<String, Object>> getMpa() {
         log.info("Вывод всех рейтингов Ассоциации кинокомпаний и их id");

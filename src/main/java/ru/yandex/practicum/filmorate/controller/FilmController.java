@@ -59,12 +59,26 @@ public class FilmController {
     }
 
     /**
+     * Поиск по названию фильмов и по режиссёру.
+     * Возвращает список фильмов, отсортированных по популярности
+     * @param query — текст для поиска
+     * @param by — может принимать значения director (поиск по режиссёру),
+     *           title (поиск по названию), либо оба значения через запятую
+     *           при поиске одновременно и по режиссеру и по названию.
+     */
+    @GetMapping("/search")
+    public List<Film> getFilmsByQuery(@RequestParam String query,
+                                      @RequestParam String by) {
+        return inMemoryFilmService.getFilmsByQuery(query, by);
+    }
+
+    /**
      * Получить список общих фильмов
      */
     @GetMapping("/common")
     public List<Film> getCommonFilms(
-            @RequestParam(value = "userId", required = true) Integer userId,
-            @RequestParam(value = "friendId", required = true) Integer friendId
+            @RequestParam(value = "userId") Integer userId,
+            @RequestParam(value = "friendId") Integer friendId
     ) {
         return inMemoryFilmService.getCommonFilms(userId, friendId);
     }
@@ -77,7 +91,7 @@ public class FilmController {
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorFilmsSortedBy(
             @PathVariable int directorId,
-            @RequestParam(value = "sortBy", required = true) String sortBy
+            @RequestParam(value = "sortBy") String sortBy
     ) {
         return inMemoryFilmService.getDirectorFilmsSortedBy(directorId, sortBy);
     }
