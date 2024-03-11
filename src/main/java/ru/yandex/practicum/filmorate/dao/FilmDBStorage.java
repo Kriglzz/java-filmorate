@@ -16,6 +16,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.filmorate.dao.DirectorDBStorage.directorRowMapper;
+
 @Slf4j
 @Component
 public class FilmDBStorage implements FilmStorage {
@@ -44,6 +46,7 @@ public class FilmDBStorage implements FilmStorage {
         insertMpa(film);
         insertGenre(film);
         insertLikes(film);
+        insertDirector(film);
 
         Optional<Film> addedFilm = Optional.of(film);
         return addedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -79,6 +82,11 @@ public class FilmDBStorage implements FilmStorage {
         String deleteLikesSql = "DELETE FROM likes WHERE film_id=?";
         jdbcTemplate.update(deleteLikesSql, film.getId());
         insertLikes(film);
+
+        String deleteDirectorsSql = "DELETE FROM films_directors WHERE film_id=?";
+        jdbcTemplate.update(deleteDirectorsSql, film.getId());
+        insertDirector(film);
+
         Optional<Film> updatedFilm = Optional.of(film);
         return updatedFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -105,6 +113,7 @@ public class FilmDBStorage implements FilmStorage {
                 film.setGenres(new HashSet<Film.GenreWrap>());
             } // Ииии тааак сойдеееет
             film.setLikes(selectLikes(id));
+            film.setDirectors(selectDirectors(id));
             filmsWithStats.add(film);
         }
 
@@ -129,6 +138,7 @@ public class FilmDBStorage implements FilmStorage {
                 film.setGenres(new HashSet<Film.GenreWrap>());
             }
             film.setLikes(selectLikes(id));
+            film.setDirectors(selectDirectors(id));
 
             Optional<Film> foundFilm = Optional.of(film);
             return foundFilm.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден"));
@@ -244,8 +254,19 @@ public class FilmDBStorage implements FilmStorage {
         }
     }
 
-    private HashMap<Integer, Film.MpaWrap> selectMpa() {
+    private void insertDirector(Film film) {
+        String sql = "INSERT INTO films_directors(film_id, director_id) " +
+                "VALUES (?, ?)";
+        if (!film.getDirectors().isEmpty()) {
+            for (Film.DirectorWrap director : film.getDirectors()) {
+                if (director.getId() > 0) {
+                    jdbcTemplate.update(sql, film.getId(), director.getId());
+                }
+            }
+        }
+    }
 
+    private HashMap<Integer, Film.MpaWrap> selectMpa() {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT MPA_ids.film_id, motion_picture_association.mpa_id, motion_picture_association.mpa_name " +
                         "FROM MPA_ids " +
@@ -264,7 +285,6 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private HashMap<Integer, Set<Film.GenreWrap>> selectGenres() {
-
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM film_genres" +
                         " LEFT OUTER JOIN genres" +
@@ -297,16 +317,23 @@ public class FilmDBStorage implements FilmStorage {
         return filmLikes;
     }
 
+    private List<Film.DirectorWrap> selectDirectors(int filmId) {
+        String sql = "SELECT d.director_id, d.director_name FROM directors d " +
+                "LEFT JOIN films_directors fd ON fd.director_id = d.director_id " +
+                "WHERE fd.film_id=?";
+        return jdbcTemplate.query(sql, directorRowMapper(), filmId);
+    }
+
     /**
      * Получить список общих фильмов
      */
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
                 "SELECT u.film_id " +
-                    "FROM likes as u " +
-                    "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
-                    "ON u.film_id = f.film_id " +
-                    "WHERE user_id = ? ;", friendId, userId);
+                        "FROM likes as u " +
+                        "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE user_id = ? ;", friendId, userId);
         ArrayList<Film> result = new ArrayList<>();
         while (commonFilmsRows.next()) {
             int filmId = commonFilmsRows.getInt("film_id");
@@ -317,4 +344,54 @@ public class FilmDBStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
+    public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
+        List<Integer> filmsIds;
+        filmsIds = jdbcTemplate.query(
+                "SELECT film_id FROM films_directors WHERE director_id = ?;",
+                (rs, rowNum) -> rs.getInt("film_id"),
+                directorId
+        );
+        if (filmsIds.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        List<Film> films = new ArrayList<>();
+        for (int id : filmsIds) {
+            films.add(getFilmById(id));
+        }
+
+        switch (sortBy) {
+            case "likes":
+                films = films.stream()
+                        .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                        .collect(Collectors.toList());
+                break;
+            case "year":
+                films = films.stream()
+                        .sorted(Comparator.comparing(Film::getReleaseDate))
+                        .collect(Collectors.toList());
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> getUnCommonFilms(Integer userId, Integer anotherUserId) {
+        SqlRowSet uncommonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                        "FROM likes as u " +
+                        "LEFT JOIN (SELECT film_id FROM likes WHERE user_id = ?) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE f.film_id IS NULL AND u.user_id = ?;", userId, anotherUserId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (uncommonFilmsRows.next()) {
+            int filmId = uncommonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
 }

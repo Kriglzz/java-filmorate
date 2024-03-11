@@ -74,4 +74,11 @@ public class FilmController {
         inMemoryFilmService.deleteFilm(filmId);
     }
 
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilmsSortedBy(
+            @PathVariable int directorId,
+            @RequestParam(value = "sortBy", required = true) String sortBy
+    ) {
+        return inMemoryFilmService.getDirectorFilmsSortedBy(directorId, sortBy);
+    }
 }
