@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.validator.AfterDate;
 
 import javax.validation.constraints.NotBlank;
@@ -54,6 +56,8 @@ public class Film {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class GenreWrap {
         private int id;
         private String name;

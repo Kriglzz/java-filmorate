@@ -47,10 +47,15 @@ public class FilmController {
         inMemoryFilmService.deleteLike(userId, filmId);
     }
 
+    /**
+     * Получить список популярных фильмов
+     */
     @GetMapping("/popular")
     public List<Film> getPopularFilms(
-            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        return inMemoryFilmService.getMostLikedFilms(count);
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
+        return inMemoryFilmService.getMostLikedFilms(count, genreId, year);
     }
 
     /**
