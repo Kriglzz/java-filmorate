@@ -8,7 +8,11 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,6 +98,7 @@ public class InMemoryFilmService implements FilmService {
                 .limit(count).collect(Collectors.toList());
     }
 
+    @Override
     public List<Film> getFilmsByQuery(String query, String by) {
         log.info("Выполним поиск фильма");
         if (query.isBlank()) {
@@ -168,6 +173,7 @@ public class InMemoryFilmService implements FilmService {
     /**
      * Получить список общих фильмов
      */
+    @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         log.info("Вывод общих фильмов для юзера с id {} и друга с id {}.", userId, friendId);
         return filmDBStorage.getCommonFilms(userId, friendId);
@@ -179,6 +185,7 @@ public class InMemoryFilmService implements FilmService {
         filmDBStorage.deleteFilm(filmId);
     }
 
+    @Override
     public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
         log.info("Получение фильмов режиссера {} с сортировкой по {}", directorId, sortBy);
         return filmDBStorage.getDirectorFilmsSortedBy(directorId, sortBy);
