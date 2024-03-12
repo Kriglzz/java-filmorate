@@ -11,48 +11,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.service.FilmDbService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
-    private final InMemoryFilmService inMemoryFilmService;
+    private final FilmDbService filmService;
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        return inMemoryFilmService.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return inMemoryFilmService.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable int filmId) {
-        return inMemoryFilmService.getFilmById(filmId);
+        return filmService.getFilmById(filmId);
     }
 
     @GetMapping
-    public ArrayList<Film> getAllFilms() {
-        return inMemoryFilmService.getAllFilms();
+    public List<Film> getAllFilms() {
+        return filmService.getAllFilms();
     }
 
     @PutMapping("/{filmId}/like/{userId}")
     public void giveLikeToFilm(@PathVariable int filmId,
                                @PathVariable int userId) {
-        inMemoryFilmService.giveLike(userId, filmId);
+        filmService.giveLike(userId, filmId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void deleteLike(@PathVariable int filmId,
                            @PathVariable int userId) {
-        inMemoryFilmService.deleteLike(userId, filmId);
+        filmService.deleteLike(userId, filmId);
     }
 
     /**
@@ -63,7 +62,7 @@ public class FilmController {
             @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year) {
-        return inMemoryFilmService.getMostLikedFilms(count, genreId, year);
+        return filmService.getMostLikedFilms(count, genreId, year);
     }
 
     /**
@@ -77,7 +76,7 @@ public class FilmController {
     @GetMapping("/search")
     public List<Film> getFilmsByQuery(@RequestParam String query,
                                       @RequestParam String by) {
-        return inMemoryFilmService.getFilmsByQuery(query, by);
+        return filmService.getFilmsByQuery(query, by);
     }
 
     /**
@@ -88,12 +87,12 @@ public class FilmController {
             @RequestParam(value = "userId") Integer userId,
             @RequestParam(value = "friendId") Integer friendId
     ) {
-        return inMemoryFilmService.getCommonFilms(userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
     }
 
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable int filmId) {
-        inMemoryFilmService.deleteFilm(filmId);
+        filmService.deleteFilm(filmId);
     }
 
     @GetMapping("/director/{directorId}")
@@ -101,6 +100,6 @@ public class FilmController {
             @PathVariable int directorId,
             @RequestParam(value = "sortBy") String sortBy
     ) {
-        return inMemoryFilmService.getDirectorFilmsSortedBy(directorId, sortBy);
+        return filmService.getDirectorFilmsSortedBy(directorId, sortBy);
     }
 }
