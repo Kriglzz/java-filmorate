@@ -35,7 +35,7 @@ public class ReviewDbService implements ReviewService {
         log.info("Обновление отзыва {}.", review);
         userDBStorage.getUserById(review.getUserId());
         filmDBStorage.getFilmById(review.getFilmId());
-        reviewStorage.getById(review.getReviewId()).orElseThrow(() -> new NotFoundException("Data not found"));
+        reviewStorage.getById(review.getReviewId()).orElseThrow(() -> new NotFoundException());
         return reviewStorage.updateReview(review);
     }
 
@@ -48,7 +48,7 @@ public class ReviewDbService implements ReviewService {
     @Override
     public Review getById(Integer id) {
         log.info("Получение отзыва с id: {}", id);
-        return reviewStorage.getById(id).orElseThrow(() -> new NotFoundException("Data not found"));
+        return reviewStorage.getById(id).orElseThrow(() -> new NotFoundException());
     }
 
     @Override
@@ -60,28 +60,28 @@ public class ReviewDbService implements ReviewService {
     @Override
     public void likeAReview(Integer reviewId, Long userId) {
         log.info("Лайк на отзыв с id {} пользователем с id: {}", reviewId, userId);
-        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException("Data not found"));
+        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException());
         reviewStorage.likeAReview(reviewId, userId);
     }
 
     @Override
     public void dislikeAReview(Integer reviewId, Long userId) {
         log.info("Дизлайк на отзыв с id {} пользователем с id: {}", reviewId, userId);
-        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException("Data not found"));
+        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException());
         reviewStorage.dislikeAReview(reviewId, userId);
     }
 
     @Override
     public void deleteLikeOfReview(Integer reviewId, Long userId) {
         log.info("Удаление лайка на отзыв с id {} пользователем с id: {}", reviewId, userId);
-        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException("Data not found"));
+        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException());
         reviewStorage.deleteScore(reviewId, userId);
     }
 
     @Override
     public void deleteDislikeOfReview(Integer reviewId, Long userId) {
         log.info("Удаление дизлайка на отзыв с id {} пользователем с id: {}", reviewId, userId);
-        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException("Data not found"));
+        reviewStorage.getById(reviewId).orElseThrow(() -> new NotFoundException());
         reviewStorage.deleteScore(reviewId, userId);
     }
 }

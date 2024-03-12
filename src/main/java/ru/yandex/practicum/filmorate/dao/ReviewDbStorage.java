@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -33,7 +34,7 @@ public class ReviewDbStorage implements ReviewStorage {
         params.addValue("useful", review.getUseful());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(sql, params, keyHolder);
-        int id = keyHolder.getKey().intValue();
+        Integer id = Objects.requireNonNull(keyHolder.getKey()).intValue();
         review.setReviewId(id);
         return review;
     }
@@ -47,7 +48,7 @@ public class ReviewDbStorage implements ReviewStorage {
         params.addValue("is_positive", review.getIsPositive());
         params.addValue("review_id", review.getReviewId());
         namedParameterJdbcTemplate.update(sql, params);
-        return getById(review.getReviewId()).orElseThrow(() -> new NotFoundException("Data not found"));
+        return getById(review.getReviewId()).orElseThrow(() -> new NotFoundException());
     }
 
     @Override
