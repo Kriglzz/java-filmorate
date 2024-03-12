@@ -37,7 +37,7 @@ public class ReviewController {
 
     @GetMapping
     public List<Review> getAll(
-            @RequestParam(name = "filmId", defaultValue = "-999", required = false) Integer filmId,
+            @RequestParam(name = "filmId", defaultValue = "-1", required = false) Integer filmId,
             @RequestParam(name = "count", defaultValue = "10", required = false) int count) {
         return reviewService.getAll(filmId, count);
     }
