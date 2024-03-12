@@ -100,7 +100,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     @Override
-    public ArrayList<Film> getAllFilms() {
+    public List<Film> getAllFilms() {
         ArrayList<Film> films = new ArrayList<>();
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM film");
         while (filmRows.next()) {
@@ -230,6 +230,107 @@ public class FilmDBStorage implements FilmStorage {
         }
     }
 
+    /**
+     * Получить список общих фильмов
+     */
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                        "FROM likes as u " +
+                        "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE user_id = ? ;", friendId, userId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (commonFilmsRows.next()) {
+            int filmId = commonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
+
+    public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
+        List<Integer> filmsIds;
+        filmsIds = jdbcTemplate.query(
+                "SELECT film_id FROM films_directors WHERE director_id = ?;",
+                (rs, rowNum) -> rs.getInt("film_id"),
+                directorId
+        );
+        if (filmsIds.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        List<Film> films = new ArrayList<>();
+        for (int id : filmsIds) {
+            films.add(getFilmById(id));
+        }
+
+        switch (sortBy) {
+            case "likes":
+                films = films.stream()
+                        .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                        .collect(Collectors.toList());
+                break;
+            case "year":
+                films = films.stream()
+                        .sorted(Comparator.comparing(Film::getReleaseDate))
+                        .collect(Collectors.toList());
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> getUnCommonFilms(Integer userId, Integer anotherUserId) {
+        SqlRowSet uncommonFilmsRows = jdbcTemplate.queryForRowSet(
+                "SELECT u.film_id " +
+                        "FROM likes as u " +
+                        "LEFT JOIN (SELECT film_id FROM likes WHERE user_id = ?) as f " +
+                        "ON u.film_id = f.film_id " +
+                        "WHERE f.film_id IS NULL AND u.user_id = ?;", userId, anotherUserId);
+        ArrayList<Film> result = new ArrayList<>();
+        while (uncommonFilmsRows.next()) {
+            int filmId = uncommonFilmsRows.getInt("film_id");
+            result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> getFilmsByQuery(String query, String by) {
+        String sql = "SELECT f.*" +
+                "FROM film f " +
+                "LEFT JOIN films_directors fd ON f.film_id = fd.film_id " +
+                "LEFT JOIN directors d ON fd.director_id = d.director_id ";
+        ArrayList<Film> result = new ArrayList<>();
+        SqlRowSet filmsByQuery = null;
+        if (by.equals("title")) {
+            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(f.name) LIKE ?", query);
+        }
+        if (by.equals("director")) {
+            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(d.director_name) LIKE ?", query);
+        }
+        if (by.equals("director,title") || by.equals("title,director")) {
+            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(f.name) LIKE ? " +
+                    "OR LOWER(d.director_name) LIKE ?", query, query);
+        }
+        if (filmsByQuery != null) {
+            while (filmsByQuery.next()) {
+                int filmId = filmsByQuery.getInt("film_id");
+                result.add(getFilmById(filmId));
+            }
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
+
     private void insertMpa(Film film) {
         if (film.getMpa() != null) {
             String insertMpaSql = "INSERT INTO MPA_ids(film_id, mpa_id) VALUES (?, ?)";
@@ -326,105 +427,5 @@ public class FilmDBStorage implements FilmStorage {
                 "LEFT JOIN films_directors fd ON fd.director_id = d.director_id " +
                 "WHERE fd.film_id=?";
         return jdbcTemplate.query(sql, directorRowMapper(), filmId);
-    }
-
-    /**
-     * Получить список общих фильмов
-     */
-    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        SqlRowSet commonFilmsRows = jdbcTemplate.queryForRowSet(
-                "SELECT u.film_id " +
-                        "FROM likes as u " +
-                        "INNER JOIN (SELECT film_id FROM likes WHERE user_id = ? ) as f " +
-                        "ON u.film_id = f.film_id " +
-                        "WHERE user_id = ? ;", friendId, userId);
-        ArrayList<Film> result = new ArrayList<>();
-        while (commonFilmsRows.next()) {
-            int filmId = commonFilmsRows.getInt("film_id");
-            result.add(getFilmById(filmId));
-        }
-        return result.stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .collect(Collectors.toList());
-    }
-
-    public List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy) {
-        List<Integer> filmsIds;
-        filmsIds = jdbcTemplate.query(
-                "SELECT film_id FROM films_directors WHERE director_id = ?;",
-                (rs, rowNum) -> rs.getInt("film_id"),
-                directorId
-        );
-        if (filmsIds.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-        List<Film> films = new ArrayList<>();
-        for (int id : filmsIds) {
-            films.add(getFilmById(id));
-        }
-
-        switch (sortBy) {
-            case "likes":
-                films = films.stream()
-                        .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                        .collect(Collectors.toList());
-                break;
-            case "year":
-                films = films.stream()
-                        .sorted(Comparator.comparing(Film::getReleaseDate))
-                        .collect(Collectors.toList());
-                break;
-            default:
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        return films;
-    }
-
-    @Override
-    public List<Film> getUnCommonFilms(Integer userId, Integer anotherUserId) {
-        SqlRowSet uncommonFilmsRows = jdbcTemplate.queryForRowSet(
-                "SELECT u.film_id " +
-                        "FROM likes as u " +
-                        "LEFT JOIN (SELECT film_id FROM likes WHERE user_id = ?) as f " +
-                        "ON u.film_id = f.film_id " +
-                        "WHERE f.film_id IS NULL AND u.user_id = ?;", userId, anotherUserId);
-        ArrayList<Film> result = new ArrayList<>();
-        while (uncommonFilmsRows.next()) {
-            int filmId = uncommonFilmsRows.getInt("film_id");
-            result.add(getFilmById(filmId));
-        }
-        return result.stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Film> getFilmsByQuery(String query, String by) {
-        String sql = "SELECT f.*" +
-                "FROM film f " +
-                "LEFT JOIN films_directors fd ON f.film_id = fd.film_id " +
-                "LEFT JOIN directors d ON fd.director_id = d.director_id ";
-        ArrayList<Film> result = new ArrayList<>();
-        SqlRowSet filmsByQuery = null;
-        if (by.equals("title")) {
-            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(f.name) LIKE ?", query);
-        }
-        if (by.equals("director")) {
-            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(d.director_name) LIKE ?", query);
-        }
-        if (by.equals("director,title") || by.equals("title,director")) {
-            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(f.name) LIKE ? " +
-                    "OR LOWER(d.director_name) LIKE ?", query, query);
-        }
-        if (filmsByQuery != null) {
-            while (filmsByQuery.next()) {
-                int filmId = filmsByQuery.getInt("film_id");
-                result.add(getFilmById(filmId));
-            }
-        }
-        return result.stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .collect(Collectors.toList());
     }
 }

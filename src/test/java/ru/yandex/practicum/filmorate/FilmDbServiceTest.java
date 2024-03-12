@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class InMemoryFilmServiceTest {
+public class FilmDbServiceTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Test
@@ -25,7 +25,6 @@ public class InMemoryFilmServiceTest {
                 LocalDate.of(2007, 7, 7),
                 100);
         HashSet<Integer> like = new HashSet<>();
-        like.clear();
         FilmDBStorage filmDBStorage = new FilmDBStorage(jdbcTemplate);
         filmDBStorage.addFilm(film);
         Film savedFilm = filmDBStorage.getFilmById(1);

@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class InMemoryUserServiceTest {
+public class UserDbServiceTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Test
