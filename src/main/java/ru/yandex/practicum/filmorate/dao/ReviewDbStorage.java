@@ -88,7 +88,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void likeAReview(Integer id, Long userId) {
-        String sql = "MERGE INTO film_reviews (review_id, user_id, is_positive)" +
+        String sql = "INSERT INTO film_reviews (review_id, user_id, is_positive)" +
                 " VALUES (:review_id, :user_id, :is_positive)";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("review_id", id);
@@ -100,7 +100,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void dislikeAReview(Integer id, Long userId) {
-        String sql = "MERGE INTO film_reviews (review_id, user_id, is_positive)" +
+        String sql = "INSERT INTO film_reviews (review_id, user_id, is_positive)" +
                 " VALUES (:review_id, :user_id, :is_positive)";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("review_id", id);
