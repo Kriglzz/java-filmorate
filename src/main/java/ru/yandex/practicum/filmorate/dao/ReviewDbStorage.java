@@ -22,6 +22,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    private static final Integer DEFAULT_VALUE = -1;
+
     @Override
     public Review addReview(Review review) {
         String sql = "INSERT INTO reviews (content, is_positive, user_id, film_id, useful) " +
@@ -71,7 +73,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getAll(Integer id, int count) {
-        if (id == -999) {
+        if (id == DEFAULT_VALUE) {
             String sql = "SELECT review_id, content, is_positive, user_id, film_id, useful FROM reviews " +
                     "GROUP BY review_id ORDER BY useful DESC LIMIT :count";
             MapSqlParameterSource params = new MapSqlParameterSource();
