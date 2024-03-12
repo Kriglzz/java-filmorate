@@ -1,7 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.InMemoryFilmService;
 
@@ -59,12 +67,26 @@ public class FilmController {
     }
 
     /**
+     * Поиск по названию фильмов и по режиссёру.
+     * Возвращает список фильмов, отсортированных по популярности
+     * @param query — текст для поиска
+     * @param by — может принимать значения director (поиск по режиссёру),
+     *           title (поиск по названию), либо оба значения через запятую
+     *           при поиске одновременно и по режиссеру и по названию.
+     */
+    @GetMapping("/search")
+    public List<Film> getFilmsByQuery(@RequestParam String query,
+                                      @RequestParam String by) {
+        return inMemoryFilmService.getFilmsByQuery(query, by);
+    }
+
+    /**
      * Получить список общих фильмов
      */
     @GetMapping("/common")
     public List<Film> getCommonFilms(
-            @RequestParam(value = "userId", required = true) Integer userId,
-            @RequestParam(value = "friendId", required = true) Integer friendId
+            @RequestParam(value = "userId") Integer userId,
+            @RequestParam(value = "friendId") Integer friendId
     ) {
         return inMemoryFilmService.getCommonFilms(userId, friendId);
     }
@@ -77,7 +99,7 @@ public class FilmController {
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorFilmsSortedBy(
             @PathVariable int directorId,
-            @RequestParam(value = "sortBy", required = true) String sortBy
+            @RequestParam(value = "sortBy") String sortBy
     ) {
         return inMemoryFilmService.getDirectorFilmsSortedBy(directorId, sortBy);
     }

@@ -30,7 +30,9 @@ public interface FilmStorage {
 
     Set<Integer> giveLike(int userId, int filmId);
 
-    Set<Integer> deleteLike(int userId, int filmId);
+    void deleteLike(int userId, int filmId);
 
     List<Film> getUnCommonFilms(Integer userId, Integer friendId);
+
+    List<Film> getFilmsByQuery(String query, String by);
 }

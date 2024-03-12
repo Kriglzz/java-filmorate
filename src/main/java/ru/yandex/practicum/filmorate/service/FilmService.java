@@ -21,6 +21,8 @@ public interface FilmService {
 
     List<Film> getMostLikedFilms(Integer count, Integer genreId, Integer year);
 
+    List<Film> getFilmsByQuery(String query, String by);
+
     List<Map<String, Object>> getMpa();
 
     Map<String, Object> getMpaById(int mpaId);
@@ -32,4 +34,6 @@ public interface FilmService {
     List<Film> getCommonFilms(Integer userId, Integer friendId);
 
     void deleteFilm(int filmId);
+
+    List<Film> getDirectorFilmsSortedBy(int directorId, String sortBy);
 }

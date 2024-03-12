@@ -13,7 +13,15 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.dao.DirectorDBStorage.directorRowMapper;
@@ -110,8 +118,8 @@ public class FilmDBStorage implements FilmStorage {
             film.setMpa(selectMpa().get(id));
             film.setGenres(selectGenres().get(id));
             if (film.getGenres() == null) {
-                film.setGenres(new HashSet<Film.GenreWrap>());
-            } // Ииии тааак сойдеееет
+                film.setGenres(new HashSet<>());
+            }
             film.setLikes(selectLikes(id));
             film.setDirectors(selectDirectors(id));
             filmsWithStats.add(film);
@@ -135,7 +143,7 @@ public class FilmDBStorage implements FilmStorage {
             film.setMpa(selectMpa().get(id));
             film.setGenres(selectGenres().get(id));
             if (film.getGenres() == null) {
-                film.setGenres(new HashSet<Film.GenreWrap>());
+                film.setGenres(new HashSet<>());
             }
             film.setLikes(selectLikes(id));
             film.setDirectors(selectDirectors(id));
@@ -212,18 +220,14 @@ public class FilmDBStorage implements FilmStorage {
         return likes;
     }
 
-    public Set<Integer> deleteLike(int userId, int filmId) {
+    public void deleteLike(int userId, int filmId) {
         String deleteLike = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
         jdbcTemplate.update(deleteLike, userId, filmId);
-
-        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("SELECT user_id FROM likes WHERE film_id = ?", filmId);
-        Set<Integer> likes = new HashSet<>();
 
         Film film = getFilmById(filmId);
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
         }
-        return likes;
     }
 
     private void insertMpa(Film film) {
@@ -389,6 +393,35 @@ public class FilmDBStorage implements FilmStorage {
         while (uncommonFilmsRows.next()) {
             int filmId = uncommonFilmsRows.getInt("film_id");
             result.add(getFilmById(filmId));
+        }
+        return result.stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> getFilmsByQuery(String query, String by) {
+        String sql = "SELECT f.*" +
+                "FROM film f " +
+                "LEFT JOIN films_directors fd ON f.film_id = fd.film_id " +
+                "LEFT JOIN directors d ON fd.director_id = d.director_id ";
+        ArrayList<Film> result = new ArrayList<>();
+        SqlRowSet filmsByQuery = null;
+        if (by.equals("title")) {
+            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(f.name) LIKE ?", query);
+        }
+        if (by.equals("director")) {
+            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(d.director_name) LIKE ?", query);
+        }
+        if (by.equals("director,title") || by.equals("title,director")) {
+            filmsByQuery = jdbcTemplate.queryForRowSet(sql + "WHERE LOWER(f.name) LIKE ? " +
+                    "OR LOWER(d.director_name) LIKE ?", query, query);
+        }
+        if (filmsByQuery != null) {
+            while (filmsByQuery.next()) {
+                int filmId = filmsByQuery.getInt("film_id");
+                result.add(getFilmById(filmId));
+            }
         }
         return result.stream()
                 .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
