@@ -91,13 +91,22 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}")
-    public void deleteFilm(@PathVariable int filmId) {
+    public void deleteFilm(@PathVariable Integer filmId) {
         filmService.deleteFilm(filmId);
     }
 
+    /**
+     *
+     * Поиск фильмов по режиссеру
+     * @param directorId id режиссера
+     * @param sortBy может принимать значения:
+     *               likes (сортировка по количеству лайков),
+     *               year (сортировка по году выхода).
+     *
+     */
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorFilmsSortedBy(
-            @PathVariable int directorId,
+            @PathVariable Integer directorId,
             @RequestParam(value = "sortBy") String sortBy
     ) {
         return filmService.getDirectorFilmsSortedBy(directorId, sortBy);

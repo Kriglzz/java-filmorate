@@ -23,7 +23,7 @@ public class MpaController {
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> getMpaById(@PathVariable int id) {
+    public Map<String, Object> getMpaById(@PathVariable Integer id) {
         return filmService.getMpaById(id);
     }
 }
