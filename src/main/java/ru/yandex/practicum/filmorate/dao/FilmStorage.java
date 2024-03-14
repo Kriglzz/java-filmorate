@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +13,7 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
-    ArrayList<Film> getAllFilms();
+    List<Film> getAllFilms();
 
     Film getFilmById(int filmId);
 
@@ -29,5 +29,11 @@ public interface FilmStorage {
 
     Set<Integer> giveLike(int userId, int filmId);
 
-    Set<Integer> deleteLike(int userId, int filmId);
+    void deleteLike(int userId, int filmId);
+
+    List<Film> getUnCommonFilms(Integer userId, Integer friendId);
+
+    List<Film> getFilmsByQuery(String query, String by);
+
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
 }

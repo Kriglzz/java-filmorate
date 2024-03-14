@@ -1,14 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.validator.AfterDate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,6 +40,7 @@ public class Film {
     private MpaWrap mpa;
     @JsonProperty("genres")
     private Set<GenreWrap> genres = new HashSet<>();
+    private List<DirectorWrap> directors = new ArrayList<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
@@ -51,9 +56,17 @@ public class Film {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class GenreWrap {
         private int id;
         private String name;
     }
 
+    @Data
+    public static class DirectorWrap {
+        private int id;
+        @NotBlank
+        private String name;
+    }
 }

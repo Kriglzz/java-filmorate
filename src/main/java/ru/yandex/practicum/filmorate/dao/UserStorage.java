@@ -17,4 +17,6 @@ public interface UserStorage {
     HashMap<Integer, String> addFriend(int userId, int friendId);
 
     HashMap<Integer, String> deleteFriend(int userId, int friendId);
+
+    void deleteUser(Long userId);
 }
